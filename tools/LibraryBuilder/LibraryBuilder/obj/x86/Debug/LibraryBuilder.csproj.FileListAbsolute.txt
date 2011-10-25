@@ -1,0 +1,5 @@
+C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\bin\Debug\LibraryBuilder.exe
+C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\bin\Debug\LibraryBuilder.pdb
+C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.exe
+C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.pdb
