@@ -1,4 +1,4 @@
-﻿package com.thaumaturgistgames.flakit
+﻿package
 {
 	import com.thaumaturgistgames.flakit.Library;
 	import com.thaumaturgistgames.flakit.Engine;
@@ -21,8 +21,7 @@
 		
 		override public function init():void 
 		{
-			super.init();
-			
+			super.init();			
 			//	Entry point
 		}
 		

@@ -3,3 +3,8 @@ C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\bin\Debug\Libr
 C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\ResolveAssemblyReference.cache
 C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.exe
 C:\Users\Jake\Documents\Monodevelop\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.pdb
+C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\tools\LibraryBuilder\LibraryBuilder\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\tools\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.exe
+C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\tools\LibraryBuilder\LibraryBuilder\obj\x86\Debug\LibraryBuilder.pdb
+C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\tools\LibraryBuilder\LibraryBuilder\bin\Debug\LibraryBuilder.exe
+C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\tools\LibraryBuilder\LibraryBuilder\bin\Debug\LibraryBuilder.pdb
