@@ -91,7 +91,7 @@
 			
 			for each (var item:imageResource in imageResources) 
 			{
-				if (item.name == name) return item.image;
+				if (item.name == name) return new Bitmap(item.image.bitmapData);
 			}
 			
 			throw new Error("The image \"" + name + "\" does not exist in the library.");
