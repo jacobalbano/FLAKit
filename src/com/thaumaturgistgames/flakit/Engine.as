@@ -2,6 +2,7 @@ package com.thaumaturgistgames.flakit
 {
 	import flash.display.MovieClip;
 	import flash.events.Event;
+	import com.thaumaturgistgames.utils.Input;
 	
 	/**
 	 * FLAKit bootloader
@@ -22,6 +23,8 @@ package com.thaumaturgistgames.flakit
 			addEventListener(Event.ENTER_FRAME, loadLibrary);
 			
 			Library.init(stage, Library.IMAGE | Library.AUDIO);
+			
+			Input.init(stage);
 		}
 		
 		private function loadLibrary(e:Event):void 

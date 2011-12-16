@@ -16,16 +16,16 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'10/26/2011'</value>
+      <value>'12/15/2011'</value>
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\src</path-element>
+      <path-element>C:\Users\Jake\Desktop\flakit\src</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Users\Jake\Documents\FlashDevelop\FLAKit\flakit\src\Game.as</path-element>
+    <path-element>C:\Users\Jake\Desktop\flakit\src\Game.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>
