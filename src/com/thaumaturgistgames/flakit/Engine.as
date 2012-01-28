@@ -11,10 +11,22 @@ package com.thaumaturgistgames.flakit
 	
 	public class Engine extends MovieClip
 	{
-		public function Engine():void 
+		private var flags:uint;
+		
+		public function Engine(flags:uint = 0 )
 		{
-			if (stage) load();
-			else addEventListener(Event.ADDED_TO_STAGE, load);
+			this.flags = flags;
+			
+			if ((this.flags & Library.USE_AUDIO) || (this.flags & Library.USE_IMAGES))
+			{
+				if (stage) load();
+				else addEventListener(Event.ADDED_TO_STAGE, load);
+			}
+			else
+			{
+				init();
+			}
+			
 		}
 		
 		private function load(e:Event = null):void 
@@ -22,7 +34,7 @@ package com.thaumaturgistgames.flakit
 			removeEventListener(Event.ADDED_TO_STAGE, load);
 			addEventListener(Event.ENTER_FRAME, loadLibrary);
 			
-			Library.init(stage, Library.IMAGE | Library.AUDIO);
+			Library.init(stage, flags);
 			
 			Input.init(stage);
 		}

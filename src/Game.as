@@ -7,7 +7,11 @@
 	public class Game extends Engine 
 	{
 		
-		public function Game()	{}
+		public function Game()
+		{
+			//	Initialize library
+			super(Library.USE_ALL);
+		}
 		
 		override public function beginLoadingScreen():void 
 		{

@@ -85,7 +85,7 @@
 		 * @param	name	The filename of the image to load
 		 * @return			A bitmap object loaded at runtime
 		 */
-		public static function IMG(name:String):Bitmap
+		public static function getImage(name:String):Bitmap
 		{
 			checkInit();
 			
@@ -97,7 +97,7 @@
 			throw new Error("The image \"" + name + "\" does not exist in the library.");
 		}
 		
-		public static function SND(name:String):Sound
+		public static function getSound(name:String):Sound
 		{
 			checkInit();
 			
@@ -106,7 +106,7 @@
 				if (item.name == name) return item.sound;
 			}
 			
-			throw new Error("The image \"" + name + "\" does not exist in the library.");
+			throw new Error("The sound \"" + name + "\" does not exist in the library.");
 		}
 		
 		/**
@@ -130,8 +130,9 @@
 			return isNaN(result) ? 0 : result;
 		}
 		
-		public static const IMAGE:int = 2;
-		public static const AUDIO:int = 4;
+		public static const USE_IMAGES:int = 2;
+		public static const USE_AUDIO:int = 4;
+		public static const USE_ALL:uint = USE_AUDIO | USE_IMAGES;
 		
 		//	Listeners
 		static private function imagesLoaded(e:Event):void 
@@ -145,7 +146,7 @@
 			{
 				stage.removeEventListener(Event.ENTER_FRAME, xmlLoaded);
 				
-				if ((loadFlags & IMAGE) > 0)
+				if ((loadFlags & USE_IMAGES) > 0)
 				{
 					for each (var imagename:XML in loader.XMLData.images.image) 
 					{
@@ -154,7 +155,7 @@
 					}
 				}
 				
-				if ((loadFlags & AUDIO) > 0)
+				if ((loadFlags & USE_AUDIO) > 0)
 				{
 					for each (var soundname:XML in loader.XMLData.sounds.sound) 
 					{
