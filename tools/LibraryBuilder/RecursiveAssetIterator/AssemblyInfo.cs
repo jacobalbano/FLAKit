@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("XMLLibraryBuilder")]
+[assembly: AssemblyTitle("RecursiveAssetIterator")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("XMLLibraryBuilder")]
+[assembly: AssemblyProduct("RecursiveAssetIterator")]
 [assembly: AssemblyCopyright("Copyright 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

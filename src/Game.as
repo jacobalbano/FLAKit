@@ -27,10 +27,6 @@
 			super.init();			
 			//	Entry point
 			
-			addChild(Library.getImage("blue.png"));
-			
-			trace(2 | 4);
-			
 		}
 		
 	}
