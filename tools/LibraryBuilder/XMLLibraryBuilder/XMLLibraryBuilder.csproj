@@ -8,7 +8,7 @@
     <ProjectGuid>{2CA03C3F-AC4F-4B1B-B02F-99941CCCF4F8}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>LibraryBuilder</RootNamespace>
-    <AssemblyName>LibraryBuilder</AssemblyName>
+    <AssemblyName>XMLLibraryBuilder</AssemblyName>
     <TargetFrameworkProfile />
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>

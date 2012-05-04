@@ -1,0 +1,4 @@
+syntax: glob
+obj/*
+bin/*
+tools/LibraryBuilder/XMLLibraryBuilder/obj/*

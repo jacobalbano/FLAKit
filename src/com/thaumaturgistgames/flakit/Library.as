@@ -21,6 +21,11 @@
 		private static var stage:Stage;
 		private static var loader:XMLLoader;
 		
+		public static const USE_IMAGES:int = 2;
+		public static const USE_AUDIO:int = 4;
+		public static const USE_EMBEDDED:uint = 8;
+		public static const USE_ALL:uint = USE_AUDIO | USE_IMAGES;
+		
 		public function Library() 
 		{
 			//	Pure static classes cannot be created as objects
@@ -38,6 +43,12 @@
 			
 			imageResources = new Vector.<imageResource>;
 			soundResources = new Vector.<soundResource>;
+			
+			if (flags & Library.USE_EMBEDDED)
+			{
+				isInitialized = true;
+				return;
+			}
 			
 			totalImages = 0;
 			loadedImages = 0;
@@ -129,10 +140,6 @@
 			var result:Number = loadedImages + loadedSounds / totalImages + totalSounds * 100;
 			return isNaN(result) ? 0 : result;
 		}
-		
-		public static const USE_IMAGES:int = 2;
-		public static const USE_AUDIO:int = 4;
-		public static const USE_ALL:uint = USE_AUDIO | USE_IMAGES;
 		
 		//	Listeners
 		static private function imagesLoaded(e:Event):void 

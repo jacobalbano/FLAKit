@@ -5,8 +5,7 @@
 	
 	[SWF(width = "800", height = "600")]
 	public class Game extends Engine 
-	{
-		
+	{		
 		public function Game()
 		{
 			//	Initialize library
@@ -27,6 +26,11 @@
 		{
 			super.init();			
 			//	Entry point
+			
+			addChild(Library.getImage("blue.png"));
+			
+			trace(2 | 4);
+			
 		}
 		
 	}
