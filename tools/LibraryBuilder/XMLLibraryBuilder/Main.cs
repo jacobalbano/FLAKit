@@ -5,6 +5,9 @@ using System.IO;
 using System.Xml;
 using System.Data.SqlClient;
 
+/// <summary>
+/// Recursively searches a directory and generates an XML file to load image and sound assets
+/// </summary>
 class Program
 {
 

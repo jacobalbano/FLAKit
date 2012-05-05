@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
+/// <summary>
+/// Recursively searches a directory and generates an Actionscript 3 source file to embed image and sound assets
+/// </summary>
 class Program
 {
 	
@@ -48,7 +51,7 @@ class Program
 			{
 				file.WriteLine(line);
 			}
-
+			
 			foreach (string i in images)
 			{
 				file.WriteLine(GenerateEmbedCode(i, imageAssets));
@@ -103,13 +106,14 @@ class Program
 		string declBegin = "private const ";		
 		string declEnd = ":Class;";
 		
+		//	Strip the './' prefix from the files
 		filename = filename.Remove(0, 2);
 		
 		string classname = "FLAKIT_ASSET$" + filename.GetHashCode().ToString();
 		classname = classname.Replace('-', '_');
 		
 		assets.Add(filename, classname);
-
+		
 		return format + embedBegin + filename + embedEnd + declBegin + classname + declEnd;
 	}
 	
