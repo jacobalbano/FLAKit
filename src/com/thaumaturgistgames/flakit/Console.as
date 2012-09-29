@@ -131,12 +131,21 @@ package com.thaumaturgistgames.flakit
 				trace(message);
 			};
 			
-			stage.addEventListener(KeyboardEvent.KEY_UP, function(event:KeyboardEvent):void
+			Engine.game.addEventListener(KeyboardEvent.KEY_UP, function(event:KeyboardEvent):void
 			{
 				if (event.keyCode == Keyboard.F11 || event.keyCode == 192 /* tilde */)
 				{
 					juice = 0;
 				   fadingIn = !fadingIn;
+				}
+			});
+			
+			inputField.addEventListener(Event.CHANGE, function(event:Event):void
+			{
+				//	If the tilde or grave character is entered into the console, remove it
+				if (event.target.text.indexOf("`") >= 0 || event.target.text.indexOf("~") >= 0)
+				{
+					event.target.text = event.target.text.split("`").join("").split("~").join("");
 				}
 			});
 			
