@@ -12,6 +12,8 @@ package com.thaumaturgistgames.flakit
 	public class Engine extends MovieClip
 	{
 		private var flags:uint;
+		public var console:Console;
+		public static var game:Game;
 		
 		/**
 		 * Creates a new engine base
@@ -22,7 +24,10 @@ package com.thaumaturgistgames.flakit
 		 */
 		public function Engine(flags:uint = 0, resourceClass:Class = null)
 		{
+			game = (this as Game);
 			this.flags = flags;
+			console = new Console();
+			addChild(console);
 			
 			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
 			{
