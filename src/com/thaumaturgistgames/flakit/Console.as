@@ -186,6 +186,7 @@ package com.thaumaturgistgames.flakit
 			   outputField.scrollV = outputField.maxScrollV;
 			   var command:String = event.target.text;
 			   event.target.text = "";
+			   trace("]", command);
 			   engine.doLine(command);
 			   history.push(command);
 			   historyIndex = history.length;
