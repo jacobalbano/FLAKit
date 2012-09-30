@@ -12,21 +12,10 @@
 			super(Library.USE_ALL);
 		}
 		
-		override public function beginLoadingScreen():void 
-		{
-			//	Your loading screen goes here
-		}
-		
-		override public function endLoadingScreen():void 
-		{
-			//	Remove your loading screen if you added one
-		}
-		
 		override public function init():void 
 		{
 			super.init();			
 			//	Entry point
-			
 		}
 		
 	}
