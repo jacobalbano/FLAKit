@@ -3,6 +3,8 @@ package com.thaumaturgistgames.flakit
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import com.thaumaturgistgames.utils.Input;
+	import flash.events.KeyboardEvent;
+	import flash.ui.Keyboard;
 	
 	/**
 	 * FLAKit bootloader
@@ -12,6 +14,7 @@ package com.thaumaturgistgames.flakit
 	public class Engine extends MovieClip
 	{
 		private var flags:uint;
+		private var isInitialized:Boolean;
 		public var console:Console;
 		public static var game:Game;
 		
@@ -24,10 +27,13 @@ package com.thaumaturgistgames.flakit
 		 */
 		public function Engine(flags:uint = 0, resourceClass:Class = null)
 		{
+			isInitialized = false;
 			game = (this as Game);
 			this.flags = flags;
 			console = new Console();
 			addChild(console);
+			console.slang.addFunction("reload", reloadLibrary, [], this, "Reloads library assets");
+			addEventListener(KeyboardEvent.KEY_UP, refresh);
 			
 			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
 			{
@@ -54,6 +60,19 @@ package com.thaumaturgistgames.flakit
 			
 		}
 		
+		private function refresh(event:KeyboardEvent):void
+		{
+			if (event.keyCode == Keyboard.F5)
+			{
+				console.slang.doLine("reload");
+			}
+		}
+		
+		private function reloadLibrary():void 
+		{
+			Library.init(this, flags);
+		}
+		
 		private function load(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, load);
@@ -66,8 +85,15 @@ package com.thaumaturgistgames.flakit
 		
 		private function loaded(event:Event):void
 		{
-			removeEventListener("libraryLoaded", loaded);
-			init();
+			Library.swapBuffers();
+			
+			console.trace("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound" : "sounds");
+			
+			if (!isInitialized)
+			{
+				isInitialized = true;
+				init();
+			}
 		}
 		
 		public function init():void

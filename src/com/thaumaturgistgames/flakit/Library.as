@@ -9,15 +9,16 @@
 	{
 		
 		private static var loadFlags:int;
-		private static var totalImages:uint;
-		private static var totalSounds:uint;
+		public static var totalImages:uint;
+		public static var totalSounds:uint;
 		private static var loadedImages:uint;
 		private static var loadedSounds:uint;
-		private static var imageResources:Vector.<imageResource>;
-		private static var soundResources:Vector.<soundResource>;
+		private static var imageResources:Array;
+		private static var soundResources:Array;
 		private static var isInitialized:Boolean;
 		private static var engine:Engine;
 		private static var loader:XMLLoader;
+		private static var front:int;
 		
 		public static const USE_IMAGES:int = 2;
 		public static const USE_AUDIO:int = 4;
@@ -37,28 +38,64 @@
 		 */
 		public static function init(parent:Engine, flags:int):void
 		{
-			engine = parent;
-			
-			imageResources = new Vector.<imageResource>;
-			soundResources = new Vector.<soundResource>;
-			
-			if (flags & Library.USE_EMBEDDED)
+			if (!isInitialized)
 			{
-				isInitialized = true;
-				return;
+				engine = parent;
+				
+				//	Double buffering
+				imageResources = [new Vector.<imageResource>, new Vector.<imageResource>];
+				soundResources = [new Vector.<soundResource>, new Vector.<soundResource>];
+				front = 0;
+				
+				if (flags & Library.USE_EMBEDDED)
+				{
+					isInitialized = true;
+					return;
+				}
+				
+				totalImages = 0;
+				loadedImages = 0;
+				
+				totalSounds = 0;
+				loadedSounds = 0;
+				
+				loadFlags = flags;
+				
+				loader = new XMLLoader(xmlLoaded);
+				
+				isInitialized = true;	
 			}
+			else
+			{
+				if (! (flags & Library.USE_EMBEDDED))
+				{
+					
+					front = Math.abs(front - 1);
+					
+					totalImages = 0;
+					loadedImages = 0;
+					
+					totalSounds = 0;
+					loadedSounds = 0;
+					
+					loadFlags = flags;
+					
+					loader = new XMLLoader(xmlLoaded);
+				}
+			}
+		}
+		
+		public static function swapBuffers():void
+		{
+			checkInit();
 			
-			totalImages = 0;
-			loadedImages = 0;
+			var index:int = Math.abs(front - 1);
 			
-			totalSounds = 0;
-			loadedSounds = 0;
+			delete soundResources[index];
+			delete imageResources[index];
 			
-			loadFlags = flags;
-			
-			loader = new XMLLoader(xmlLoaded);
-			
-			isInitialized = true;
+			soundResources[index] = new Vector.<soundResource>;
+			imageResources[index] = new Vector.<imageResource>;
 		}
 		
 		/**
@@ -70,7 +107,7 @@
 		{
 			checkInit();
 			
-			imageResources.push(new imageResource(image, name));
+			imageResources[front].push(new imageResource(image, name));
 			if (++loadedImages >= totalImages && loadedSounds >= totalSounds)
 			{
 				engine.dispatchEvent(new Event("libraryLoaded"));
@@ -83,10 +120,10 @@
 		 * @param	sound	The sound to add
 		 */
 		public static function addSound(name:String, sound:Sound):void
-		{
+		{	
 			checkInit();
 			
-			soundResources.push(new soundResource(sound, name));
+			soundResources[front].push(new soundResource(sound, name));
 			
 			if (++loadedSounds >= totalSounds && loadedImages >= totalImages)
 			{
@@ -103,7 +140,7 @@
 		{
 			checkInit();
 			
-			for each (var item:imageResource in imageResources) 
+			for each (var item:imageResource in imageResources[front]) 
 			{
 				if (item.name == name) return new Bitmap(item.image.bitmapData);
 			}
@@ -115,7 +152,7 @@
 		{
 			checkInit();
 			
-			for each (var item:soundResource in soundResources) 
+			for each (var item:soundResource in soundResources[front]) 
 			{
 				if (item.name == name) return item.sound;
 			}

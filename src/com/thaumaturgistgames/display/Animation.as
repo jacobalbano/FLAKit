@@ -18,7 +18,7 @@ package com.thaumaturgistgames.display
 		public var buffer:BitmapData;
 		private var frameDelay:uint = 0;
 		private var animation:Anim;
-		private var animations:Vector.<Anim> = new Vector.<Anim>;
+		private var animations:Vector.<Anim>;
 		private var frameWidth:Number;
 		private var frameHeight:Number;
 		private var _playing:String;
@@ -34,7 +34,6 @@ package com.thaumaturgistgames.display
 			super();
 			
 			//	Since the DATA parameter is untyped, we need to check what type it is before we can make use of it
-			//	We can do this with the 'is' keyword
 			if (DATA is Class)
 			{
 				this.storage = (new DATA).bitmapData;

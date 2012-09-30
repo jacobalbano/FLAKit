@@ -188,7 +188,10 @@ package com.thaumaturgistgames.flakit
 			   event.target.text = "";
 			   trace("]", command);
 			   engine.doLine(command);
-			   history.push(command);
+			   if (history.length == 0 || (history[history.length - 1] != command))
+			   {
+				   history.push(command);
+			   }
 			   historyIndex = history.length;
 		   }
 		   else if (event.keyCode == Keyboard.UP)
