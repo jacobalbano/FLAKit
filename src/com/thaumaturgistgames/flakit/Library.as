@@ -1,7 +1,6 @@
 ﻿package com.thaumaturgistgames.flakit
 {
 	import flash.display.Bitmap;
-	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.media.Sound;
 	import XML;
@@ -14,11 +13,10 @@
 		private static var totalSounds:uint;
 		private static var loadedImages:uint;
 		private static var loadedSounds:uint;
-		private static var _loaded:Boolean = false;
 		private static var imageResources:Vector.<imageResource>;
 		private static var soundResources:Vector.<soundResource>;
 		private static var isInitialized:Boolean;
-		private static var stage:Stage;
+		private static var engine:Engine;
 		private static var loader:XMLLoader;
 		
 		public static const USE_IMAGES:int = 2;
@@ -34,12 +32,12 @@
 		
 		/**
 		 * Initialize the Library so it can be accessed
-		 * @param	s		A reference to the stage, for internal event management
+		 * @param	engine	A reference to the document class, for event tracking
 		 * @param	flags	Which components to initialize
 		 */
-		public static function init(s:Stage, flags:int):void
+		public static function init(parent:Engine, flags:int):void
 		{
-			stage = s;
+			engine = parent;
 			
 			imageResources = new Vector.<imageResource>;
 			soundResources = new Vector.<soundResource>;
@@ -58,9 +56,7 @@
 			
 			loadFlags = flags;
 			
-			stage.addEventListener(Event.ENTER_FRAME, xmlLoaded);
-			
-			loader = new XMLLoader;
+			loader = new XMLLoader(xmlLoaded);
 			
 			isInitialized = true;
 		}
@@ -75,7 +71,10 @@
 			checkInit();
 			
 			imageResources.push(new imageResource(image, name));
-			loadedImages++;
+			if (++loadedImages >= totalImages && loadedSounds >= totalSounds)
+			{
+				engine.dispatchEvent(new Event("libraryLoaded"));
+			}
 		}
 		
 		/**
@@ -88,7 +87,11 @@
 			checkInit();
 			
 			soundResources.push(new soundResource(sound, name));
-			loadedSounds++;
+			
+			if (++loadedSounds >= totalSounds && loadedImages >= totalImages)
+			{
+				engine.dispatchEvent(new Event("libraryLoaded"));
+			}
 		}
 		
 		/**
@@ -120,62 +123,30 @@
 			throw new Error("The sound \"" + name + "\" does not exist in the library.");
 		}
 		
-		/**
-		 * Whether all media has been loaded into the Library
-		 */
-		public static function get loaded():Boolean
-		{
-			checkInit();
-			
-			return _loaded;
-		}
-		
-		/**
-		 * The load status of the Library, for loading screens
-		 */
-		public static function get loadPercentage():Number
-		{
-			checkInit();
-			
-			var result:Number = loadedImages + loadedSounds / totalImages + totalSounds * 100;
-			return isNaN(result) ? 0 : result;
-		}
-		
-		//	Listeners
-		static private function imagesLoaded(e:Event):void 
-		{
-			_loaded = (totalImages == imageResources.length && totalSounds == soundResources.length);
-		}
-		
 		private static function xmlLoaded(e:Event):void
 		{
-			if (loader.loaded)
+			if ((loadFlags & USE_IMAGES) > 0)
 			{
-				stage.removeEventListener(Event.ENTER_FRAME, xmlLoaded);
-				
-				if ((loadFlags & USE_IMAGES) > 0)
+				for each (var imagename:XML in loader.XMLData.images.image) 
 				{
-					for each (var imagename:XML in loader.XMLData.images.image) 
-					{
-						new ImageLoader(imagename);
-						totalImages++;
-					}
+					new ImageLoader(imagename);
+					totalImages++;
 				}
-				
-				if ((loadFlags & USE_AUDIO) > 0)
+			}
+			
+			if ((loadFlags & USE_AUDIO) > 0)
+			{
+				for each (var soundname:XML in loader.XMLData.sounds.sound) 
 				{
-					for each (var soundname:XML in loader.XMLData.sounds.sound) 
-					{
-						new SoundLoader(soundname);
-						totalSounds++;
-					}
+					new SoundLoader(soundname);
+					totalSounds++;
 				}
-				
-				stage.addEventListener(Event.ENTER_FRAME, imagesLoaded);
 			}
 		}
 		
-		//	Make sure Library.init(stage) has been called already
+		/**
+		 * Make sure Library.init() has been called already
+		 */
 		private static function checkInit():void
 		{
 			

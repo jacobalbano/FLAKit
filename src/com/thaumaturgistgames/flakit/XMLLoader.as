@@ -7,34 +7,27 @@ package com.thaumaturgistgames.flakit
 	
     public class XMLLoader
     {
-        private var loader:URLLoader = new URLLoader(new URLRequest("../lib/library.xml"));
+        private var loader:URLLoader;
 		
 		public var XMLData:XML;
-		public var loaded:Boolean;
+		private var listener:Function;
     
-        public function XMLLoader()
+        public function XMLLoader(listener:Function)
         {
-            loader.addEventListener(Event.ACTIVATE, onActivated);
+			this.listener = listener;
+			
+			loader = new URLLoader(new URLRequest("../lib/library.xml"));
             loader.addEventListener(Event.COMPLETE, onComplete);
-            loader.addEventListener(ProgressEvent.PROGRESS, onProgress);
-        }
-    
-        private function onActivated(event:Event):void
-        {
-            //trace("Load of XML library initialized.");
+			loader.addEventListener("xmlLoaded", listener);
         }
     
         private function onComplete(event:Event):void
         {
             //trace("Load of XML library complete.");
-						
 			XMLData = new XML(loader.data);
-			loaded = true;
-        }
-    
-        private function onProgress(event:Event):void
-        {
-            //trace("Load of XML library progress:", loader.bytesLoaded, "out of", loader.bytesTotal, "bytes.");
+			loader.removeEventListener(Event.COMPLETE, onComplete);
+			loader.dispatchEvent(new Event("xmlLoaded"));
+			loader.removeEventListener("xmlLoaded", listener);
         }
     }
 }

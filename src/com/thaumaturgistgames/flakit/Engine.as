@@ -31,11 +31,11 @@ package com.thaumaturgistgames.flakit
 			
 			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
 			{
-				Library.init(stage, flags);
+				Library.init(this, flags);
 				
 				new resourceClass;
 				
-				Input.init(stage);
+				Input.init(this);
 				
 				init();
 			}
@@ -57,42 +57,23 @@ package com.thaumaturgistgames.flakit
 		private function load(e:Event = null):void 
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, load);
-			addEventListener(Event.ENTER_FRAME, loadLibrary);
+			this.addEventListener("libraryLoaded", loaded);
 			
-			Library.init(stage, flags);
+			Library.init(this, flags);
 			
-			Input.init(stage);
+			Input.init(this);
 		}
 		
-		private function loadLibrary(e:Event):void 
+		private function loaded(event:Event):void
 		{
-			beginLoadingScreen();
-			
-			if (Library.loaded)
-			{
-				removeEventListener(Event.ENTER_FRAME, loadLibrary);
-				init();
-			}
+			removeEventListener("libraryLoaded", loaded);
+			init();
 		}
 		
 		public function init():void
 		{
-			endLoadingScreen();
-			
 			//	Entry point
 		}
-		
-		public function beginLoadingScreen():void 
-		{
-			//	Override this
-		}
-		
-		
-		public function endLoadingScreen():void 
-		{
-			//	Override this
-		}
-		
 	}
 	
 }

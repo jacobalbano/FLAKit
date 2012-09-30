@@ -1,8 +1,8 @@
 package com.thaumaturgistgames.utils 
 {
-	import flash.display.Stage;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
+	import com.thaumaturgistgames.flakit.Engine;
 	
 	/**
 	 * ...
@@ -15,14 +15,14 @@ package com.thaumaturgistgames.utils
 		private static var _mousePressed:Boolean;
 		private static var _mouseReleased:Boolean;
 		private static var _elapsed:Number;
-		private static var _stage:Stage;
+		private static var _engine:Engine;
 		
 		public function Input() {}
 		
 		/**
 		 * Called by engine
 		 */
-		public static function init(stage:Stage):void
+		public static function init(engine:Engine):void
 		{
 			_keyStates = new Vector.<Boolean>;
 			
@@ -33,12 +33,12 @@ package com.thaumaturgistgames.utils
 			
 			_keyStates.fixed = true;
 			
-			_stage = stage;
+			_engine = engine;
 			
-			_stage.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
-			_stage.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
-			_stage.addEventListener(KeyboardEvent.KEY_DOWN, keyDown);
-			_stage.addEventListener(KeyboardEvent.KEY_UP, keyUp);
+			engine.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown);
+			engine.addEventListener(MouseEvent.MOUSE_UP, mouseUp);
+			engine.addEventListener(KeyboardEvent.KEY_DOWN, keyDown);
+			engine.addEventListener(KeyboardEvent.KEY_UP, keyUp);
 		}
 		
 		private static function keyUp(e:KeyboardEvent):void 
@@ -71,7 +71,7 @@ package com.thaumaturgistgames.utils
 		 */
 		public static function get mouseX():Number
 		{
-			return _stage.mouseX;
+			return _engine.mouseX;
 		}
 		
 		/**
@@ -79,7 +79,7 @@ package com.thaumaturgistgames.utils
 		 */
 		public static function get mouseY():Number
 		{
-			return _stage.mouseY;
+			return _engine.mouseY;
 		}
 		
 		
