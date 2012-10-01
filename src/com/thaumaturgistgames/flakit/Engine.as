@@ -17,6 +17,7 @@ package com.thaumaturgistgames.flakit
 		private var isInitialized:Boolean;
 		public var console:Console;
 		public static var game:Game;
+		public static var engine:Engine;
 		
 		/**
 		 * Creates a new engine base
@@ -28,7 +29,10 @@ package com.thaumaturgistgames.flakit
 		public function Engine(flags:uint = 0, resourceClass:Class = null)
 		{
 			isInitialized = false;
+			
 			game = (this as Game);
+			engine = this;
+			
 			this.flags = flags;
 			console = new Console();
 			addChild(console);

@@ -1,13 +1,13 @@
 package com.thaumaturgistgames.display
 {
+	import com.thaumaturgistgames.display.Sprite;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
-	import flash.display.MovieClip;
+	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import flash.events.Event;
-	import flash.events.MouseEvent;
-	import flash.display.Sprite;
+	import com.thaumaturgistgames.flakit.Engine;
+	import com.thaumaturgistgames.flakit.Library;
 
 	public class Animation extends Sprite
 	{
@@ -15,7 +15,7 @@ package com.thaumaturgistgames.display
 		public var frame:uint = 0;
 		
 		private var storage:BitmapData;
-		public var buffer:BitmapData;
+		private var canvas:BitmapData;
 		private var frameDelay:uint = 0;
 		private var animation:Anim;
 		private var animations:Vector.<Anim>;
@@ -24,51 +24,65 @@ package com.thaumaturgistgames.display
 		private var _playing:String;
 		
 		/**
-		 * 
 		 * @param	DATA 	The embedded image to assign to the animation
 		 * @param	width	Width of one animation frame
 		 * @param	height	Height of one animation frame
 		 */
 		public function Animation(DATA:*, width:Number, height:Number) 
-		{
-			super();
+		{	
+			var bmp:Bitmap;
+			var failed:Boolean = false;
 			
 			//	Since the DATA parameter is untyped, we need to check what type it is before we can make use of it
 			if (DATA is Class)
 			{
-				this.storage = (new DATA).bitmapData;
-			}
-			else if (DATA is Sprite || DATA is MovieClip)
-			{
-				this.storage = new BitmapData(DATA.width, DATA.height, true, 0);
-				this.storage.draw(DATA);
+				bmp = new DATA;
 			}
 			else if (DATA is Bitmap)
 			{
-				this.storage = DATA.bitmapData;
+				bmp = DATA;
 			}
 			else if (DATA is BitmapData)
 			{
-				this.storage = DATA;
+				bmp = new Bitmap(DATA);
+			}
+			else if (DATA is Sprite)
+			{
+				bmp = (DATA as Sprite).image;
+				filename = (DATA as Sprite).filename;
 			}
 			else
 			{
 				//	The type of DATA is incompatible, so end the program and throw an error
-				throw new Error("Invalid image source! Valid types are Class, Bitmap, BitmapData, Sprite and MovieClip.");
+				throw new Error("Invalid image source! Valid types are Class, Bitmap, BitmapData, and Sprite.");
 			}
 			
-			//	Make both bitmapData objects the same
-			this.buffer = this.storage.clone();
-			
-			//	Assign the default frame to the object
-			this.graphics.beginBitmapFill(storage, null, false, true);
-			this.graphics.drawRect(0, 0, width, height);
-			this.graphics.endFill();
+			storage = bmp.bitmapData.clone();
 			
 			this.frameWidth = width;
 			this.frameHeight = height;
 			
+			this.canvas = new BitmapData(frameWidth, frameHeight, true, 0x0);
+			var buffer:Bitmap = new Bitmap(canvas);
+			addChild(buffer);
+			
+			this.animations = new Vector.<Anim>;
+			
 			this.addEventListener("enterFrame", update);
+			Engine.engine.addEventListener("libraryLoaded", reloadEvent)
+		}
+		
+		override public function onReloaded():void 
+		{
+			if (filename.length == 0)
+			{
+				return;
+			}
+			
+			canvas.lock();
+			storage.dispose();
+			storage = Library.getImage(filename).bitmapData;
+			canvas.unlock();
 		}
 		
 		/**
@@ -170,12 +184,7 @@ package com.thaumaturgistgames.display
 			var ry:uint = uint(rx / this.storage.width) * this.frameHeight;
 			rx %= this.storage.width;
 			
-			this.buffer.copyPixels(storage, new Rectangle(rx, ry, this.frameWidth, this.frameHeight), new Point);
-			this.graphics.clear();
-			
-			this.graphics.beginBitmapFill(buffer, null, false, false);
-			this.graphics.drawRect(0, 0, this.frameWidth, this.frameHeight);
-			this.graphics.endFill();
+			this.canvas.copyPixels(storage, new Rectangle(rx, ry, this.frameWidth, this.frameHeight), new Point);
 		}
 		
 	}

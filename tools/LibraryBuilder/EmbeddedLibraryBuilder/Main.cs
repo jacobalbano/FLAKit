@@ -13,8 +13,10 @@ class Program
 	{
 		List<string> images = RecursiveAssetIterator.GetImages (".");
 		List<string> sounds = RecursiveAssetIterator.GetSounds (".");
+		List<string> xmls = RecursiveAssetIterator.GetXMLFiles (".");
 		Dictionary<string, string> imageAssets = new Dictionary<string, string>();
 		Dictionary<string, string> soundAssets = new Dictionary<string, string>();
+		Dictionary<string, string> xmlAssets = new Dictionary<string, string>();
 		
 		using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"EmbeddedAssets.as"))
         {
@@ -62,6 +64,11 @@ class Program
 				file.WriteLine(GenerateEmbedCode(s, soundAssets));
 			}
 			
+			foreach (string x in xmls)
+			{
+				file.WriteLine(GenerateEmbedCode(x, xmlAssets, true));
+			}
+			
 			foreach (string line in classOutlineBegin)
 			{
 				file.WriteLine(line);
@@ -97,12 +104,12 @@ class Program
 			
 	}
 	
-	public static string GenerateEmbedCode(string name, Dictionary<string, string> assets)
+	public static string GenerateEmbedCode(string name, Dictionary<string, string> assets, bool isXML = false)
 	{
 		string format = "		";
 		string embedBegin = "[Embed(source = \"../lib/";
 		string filename = name.Replace ('\\', '/');
-		string embedEnd = "\")] ";
+		string embedEnd = isXML ? "\", mimeType = \"application/octet-stream\")] " : "\")] ";
 		string declBegin = "private const ";		
 		string declEnd = ":Class;";
 		

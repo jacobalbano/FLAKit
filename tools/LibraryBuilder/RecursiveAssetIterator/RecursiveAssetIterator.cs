@@ -81,4 +81,21 @@ public class RecursiveAssetIterator
 		
 		return GetMatchingFiles(directory, patterns);
 	}
+	
+	/// <summary>
+	/// Searches a directory recursively and adds all xml files to a list
+	/// </summary>
+	/// <param name="directory">The directory to start in</param>
+	/// <returns>A list of xml files</returns>
+	public static List<string> GetXMLFiles (string directory)
+	{
+		
+		string[] patterns =
+		{
+			"*.xml",
+			"*.oel"
+		};
+		
+		return GetMatchingFiles(directory, patterns);
+	}
 }

@@ -1,5 +1,6 @@
 ﻿package com.thaumaturgistgames.flakit
 {
+	import com.thaumaturgistgames.display.Sprite;
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.media.Sound;
@@ -132,9 +133,25 @@
 		}
 		
 		/**
+		 * Retrive a sprite containing image loaded at runtine
+		 * @param	name	The filename of the image to load
+		 * @return			A sprite containing the image
+		 */
+		public static function getSprite(name:String):Sprite
+		{
+			checkInit();
+			
+			var bmp:Bitmap = getImage(name);
+			var image:Sprite = new Sprite(bmp);
+			image.filename = name;
+			
+			return image;
+		}
+		
+		/**
 		 * Retrive an image loaded at runtine
 		 * @param	name	The filename of the image to load
-		 * @return			A bitmap object loaded at runtime
+		 * @return			The loaded image
 		 */
 		public static function getImage(name:String):Bitmap
 		{
@@ -142,7 +159,10 @@
 			
 			for each (var item:imageResource in imageResources[front]) 
 			{
-				if (item.name == name) return new Bitmap(item.image.bitmapData);
+				if (item.name == name)
+				{
+					return new Bitmap(item.image.bitmapData);
+				}
 			}
 			
 			throw new Error("The image \"" + name + "\" does not exist in the library.");

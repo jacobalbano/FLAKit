@@ -16,8 +16,10 @@ class Program
 		XmlWriterSettings settings = new XmlWriterSettings ();
 		settings.Indent = true;
 		settings.IndentChars = "    ";
+		
 		List<string> images = RecursiveAssetIterator.GetImages(@".");
 		List<string> sounds = RecursiveAssetIterator.GetSounds(@".");
+		List<string> xmls = RecursiveAssetIterator.GetXMLFiles(@".");
 		
 		using (XmlWriter writer = XmlWriter.Create("Library.xml", settings))
 		{
@@ -35,6 +37,7 @@ class Program
 			}
 			
 			writer.WriteEndElement();
+			
 			writer.WriteStartElement ("sounds");
 			
 			foreach (string s in sounds)
@@ -45,6 +48,18 @@ class Program
 			}
 			
 			writer.WriteEndElement ();
+			
+			writer.WriteStartElement ("xmls");
+			
+			foreach (string s in xmls)
+			{
+				string rem = s.Replace ('\\', '/');
+				rem = rem.Remove(0, 2);
+				writer.WriteElementString ("xml", rem);
+			}
+			
+			writer.WriteEndElement ();
+			
 			writer.Flush ();
 			
 		}
