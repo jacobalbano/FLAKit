@@ -1,8 +1,9 @@
-package com.thaumaturgistgames.flakit
+package com.thaumaturgistgames.flakit.loader
 {
 	import flash.events.Event;
 	import flash.media.Sound;
 	import flash.net.URLRequest;
+	import com.thaumaturgistgames.flakit.Library;
 
 	public class SoundLoader
     {

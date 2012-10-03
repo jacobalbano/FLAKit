@@ -1,4 +1,4 @@
-package com.thaumaturgistgames.flakit
+package com.thaumaturgistgames.flakit.resource
 {
 	import flash.display.Bitmap;
 	
