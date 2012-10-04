@@ -46,6 +46,11 @@ package com.thaumaturgistgames.display
 			{
 				bmp = new Bitmap(DATA);
 			}
+			else if (DATA is String)
+			{
+				bmp = Library.getImage(DATA as String);
+				filename = DATA as String;
+			}
 			else if (DATA is Sprite)
 			{
 				bmp = (DATA as Sprite).image;

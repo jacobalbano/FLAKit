@@ -36,7 +36,9 @@ package com.thaumaturgistgames.flakit
 			this.flags = flags;
 			console = new Console();
 			addChild(console);
+			
 			console.slang.addFunction("reload", reloadLibrary, [], this, "Reloads library assets");
+			
 			addEventListener(KeyboardEvent.KEY_UP, refresh);
 			
 			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
@@ -89,9 +91,7 @@ package com.thaumaturgistgames.flakit
 		
 		private function loaded(event:Event):void
 		{
-			Library.swapBuffers();
-			
-			console.trace("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound" : "sounds");
+			console.print("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound," : "sounds,", Library.totalXMLs, "xml", Library.totalXMLs == 1 ? "file" : "files");
 			
 			if (!isInitialized)
 			{

@@ -128,7 +128,7 @@ package com.thaumaturgistgames.flakit
 			
 			engine.errorHandler = function (message:String):void
 			{
-				trace(message);
+				print(message);
 			};
 			
 			Engine.game.addEventListener(KeyboardEvent.KEY_UP, function(event:KeyboardEvent):void
@@ -186,7 +186,7 @@ package com.thaumaturgistgames.flakit
 			   outputField.scrollV = outputField.maxScrollV;
 			   var command:String = event.target.text;
 			   event.target.text = "";
-			   trace("]", command);
+			   print("]", command);
 			   engine.doLine(command);
 			   if (history.length == 0 || (history[history.length - 1] != command))
 			   {
@@ -224,7 +224,7 @@ package com.thaumaturgistgames.flakit
 		 * Behaves the same as flash's built in trace method, but outputs via the defined callback
 		 * @param	...rest
 		 */
-		public function trace(...rest):void
+		public function print(...rest):void
 		{
 			outputField.text = outputField.text.concat(rest.join(" "), "\n");
 			outputField.scrollV = outputField.maxScrollV;

@@ -14,13 +14,14 @@ package com.thaumaturgistgames.slang
 		
 		private var functions:Array;
 		private var callback:Function;
+		private var errors:Array;
 		
 		public function SlangInterpreter() 
 		{
 			callback = defaultErrorHandler;
 			functions = [];
+			errors = [];
 			addFunction("help", help, [], this, "Displays this help screen");
-			errorHandler = defaultErrorHandler;
 		}
 		
 		public function set errorHandler(handler:Function):void
@@ -50,7 +51,7 @@ package com.thaumaturgistgames.slang
 		 */
 		public function getVersion():Number 
 		{
-			return 0.1;
+			return 0.15;
 		}
 		
 		/**
@@ -68,6 +69,15 @@ package com.thaumaturgistgames.slang
 				argTypes = [];
 			}
 			
+			for each (var item:Array in functions)
+			{
+				if (item[DECLARATION] == declaration)
+				{
+					write("Failed to bind function '" + declaration + "': a function by that name already exists");
+					return;
+				}
+			}
+			
 			functions.push([declaration, func, argTypes, thisObj, documentation]);
 		}
 		
@@ -77,14 +87,7 @@ package com.thaumaturgistgames.slang
 		 */
 		public function doLine(script:String):void
 		{
-			try
-			{
-				doScript(script.split(";"));
-			}
-			catch (e:Error)
-			{
-				write(e.message);
-			}
+			doScript(script.split(";"));
 		}
 		
 		/**
@@ -93,17 +96,17 @@ package com.thaumaturgistgames.slang
 		 */
 		public function doScript(script:Array):void
 		{
-			try
+			if (!executeScript(script))
 			{
-				executeScript(script);
-			}
-			catch (e:Error)
-			{
-				write(e.message);
+				var message:String;
+				while (message = getError())
+				{
+					write(message);
+				}
 			}
 		}
 		
-		private function executeScript(script:Array):void
+		private function executeScript(script:Array):Boolean
 		{
 			//	Read the script line by line
 			for (var line:int = 0; line < script.length; ++line)
@@ -143,7 +146,8 @@ package com.thaumaturgistgames.slang
 				
 				if (funcID < 0)
 				{
-					throw new Error("Line " + (line + 1) + ": Couldn't resolve '" + fn + "' as a function.");
+					raiseError("Line " + (line + 1) + ": Couldn't resolve '" + fn + "' as a function.");
+					return false;
 				}
 				
 				thisObj = functions[funcID][THIS_OBJ];
@@ -157,7 +161,8 @@ package com.thaumaturgistgames.slang
 				{
 					if (args == "")
 					{
-						throw new Error("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " cannot be called without a parameter list");
+						raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " cannot be called without a parameter list");
+						return false;
 					}
 				}
 				
@@ -170,7 +175,7 @@ package com.thaumaturgistgames.slang
 					
 					if (argv.length != functions[funcID][ARG_TYPES].length)
 					{
-						throw new Error("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + functions[funcID][ARG_TYPES].length + " parameters, but " + argv.length + " was passed");
+						raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + functions[funcID][ARG_TYPES].length + " parameters, but " + argv.length + " was passed");
 					}
 					
 					for (var i:int = 0; i < argv.length; ++i)
@@ -189,6 +194,19 @@ package com.thaumaturgistgames.slang
 				//	Call the function
 				functions[funcID][FUNCTION].apply(thisObj, argv);
 			}
+			
+			return true;
+		}
+		
+		private function raiseError(message:String):String
+		{
+			errors.push(message);
+			return message;
+		}
+		
+		public function getError():String
+		{
+			return errors.length > 0 ? errors.pop() : null;
 		}
 		
 		public function help():void

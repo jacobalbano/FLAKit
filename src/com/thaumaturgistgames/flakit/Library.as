@@ -21,14 +21,13 @@
 		private static var loadedSounds:uint;
 		private static var loadedXMLs:uint;
 		
-		private static var imageResources:Array;
-		private static var soundResources:Array;
-		private static var XMLResources:Array;
+		private static var imageResources:Vector.<imageResource>;
+		private static var soundResources:Vector.<soundResource>;
+		private static var XMLResources:Vector.<XMLResource>;
 		
 		private static var isInitialized:Boolean;
 		private static var engine:Engine;
 		private static var loader:LibraryLoader;
-		private static var front:int;
 		
 		public static const USE_IMAGES:int = 2;
 		public static const USE_AUDIO:int = 4;
@@ -50,20 +49,18 @@
 		public static function init(parent:Engine, flags:int):void
 		{
 			if (!isInitialized)
-			{
-				engine = parent;
-				
-				//	Double buffering
-				imageResources = [new Vector.<imageResource>, new Vector.<imageResource>];
-				soundResources = [new Vector.<soundResource>, new Vector.<soundResource>];
-				XMLResources = [new Vector.<XMLResource>, new Vector.<XMLResource>];
-				front = 0;
-				
+			{	
 				if (flags & Library.USE_EMBEDDED)
 				{
 					isInitialized = true;
 					return;
 				}
+				
+				engine = parent;
+				
+				imageResources = new Vector.<imageResource>;
+				soundResources = new Vector.<soundResource>;
+				XMLResources = new Vector.<XMLResource>;
 				
 				totalImages = 0;
 				loadedImages = 0;
@@ -84,9 +81,6 @@
 			{
 				if (! (flags & Library.USE_EMBEDDED))
 				{
-					
-					front = Math.abs(front - 1);
-					
 					totalImages = 0;
 					loadedImages = 0;
 					
@@ -103,19 +97,6 @@
 			}
 		}
 		
-		public static function swapBuffers():void
-		{
-			checkInit();
-			
-			var index:int = Math.abs(front - 1);
-			
-			delete soundResources[index];
-			delete imageResources[index];
-			
-			soundResources[index] = new Vector.<soundResource>;
-			imageResources[index] = new Vector.<imageResource>;
-		}
-		
 		/**
 		 * Add a new XML document to the library
 		 * @param	name	The XML identifier
@@ -125,7 +106,23 @@
 		{
 			checkInit();
 			
-			XMLResources[front].push(new XMLResource(xml, name));
+			
+			var found:Boolean = false;
+			
+			for each (var item:XMLResource in XMLResources) 
+			{
+				if (item.name == name)
+				{
+					item.xml = xml;
+					found = true;
+				}
+			}
+			
+			if (!found)
+			{
+				XMLResources.push(new XMLResource(xml, name));
+			}
+			
 			if (++loadedXMLs >= totalXMLs && loadedImages >= totalImages && loadedSounds >= totalSounds)
 			{
 				engine.dispatchEvent(new Event("libraryLoaded"));
@@ -141,7 +138,22 @@
 		{
 			checkInit();
 			
-			imageResources[front].push(new imageResource(image, name));
+			var found:Boolean = false;
+			
+			for each (var item:imageResource in imageResources) 
+			{
+				if (item.name == name)
+				{
+					item.image = image;
+					found = true;
+				}
+			}
+			
+			if (!found)
+			{
+				imageResources.push(new imageResource(image, name));
+			}
+			
 			if (++loadedImages >= totalImages && loadedSounds >= totalSounds && loadedXMLs >= totalXMLs)
 			{
 				engine.dispatchEvent(new Event("libraryLoaded"));
@@ -157,7 +169,21 @@
 		{	
 			checkInit();
 			
-			soundResources[front].push(new soundResource(sound, name));
+			var found:Boolean = false;
+			
+			for each (var item:soundResource in soundResources) 
+			{
+				if (item.name == name)
+				{
+					item.sound = sound;
+					found = true;
+				}
+			}
+			
+			if (!found)
+			{
+				soundResources.push(new soundResource(sound, name));
+			}
 			
 			if (++loadedSounds >= totalSounds && loadedImages >= totalImages && loadedXMLs >= totalXMLs)
 			{
@@ -190,7 +216,7 @@
 		{
 			checkInit();
 			
-			for each (var item:XMLResource in XMLResources[front]) 
+			for each (var item:XMLResource in XMLResources) 
 			{
 				if (item.name == name)
 				{
@@ -210,7 +236,7 @@
 		{
 			checkInit();
 			
-			for each (var item:imageResource in imageResources[front]) 
+			for each (var item:imageResource in imageResources) 
 			{
 				if (item.name == name)
 				{
@@ -225,7 +251,7 @@
 		{
 			checkInit();
 			
-			for each (var item:soundResource in soundResources[front]) 
+			for each (var item:soundResource in soundResources) 
 			{
 				if (item.name == name) return item.sound;
 			}
@@ -260,6 +286,11 @@
 					new XMLLoader(docname);
 					totalXMLs++;
 				}
+			}
+			
+			if (!(totalImages || totalSounds || totalXMLs))
+			{
+				engine.dispatchEvent(new Event("libraryLoaded"));
 			}
 		}
 		
