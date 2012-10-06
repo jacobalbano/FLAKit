@@ -77,6 +77,35 @@ package com.thaumaturgistgames.display
 			Engine.engine.addEventListener("libraryLoaded", reloadEvent)
 		}
 		
+		public static function fromXML(xml:XML):Animation
+		{
+			var result:Animation;
+			
+			var image:String = xml.@image;
+			var width:int = new Number(xml.@width);
+			var height:int = new Number(xml.@height);
+			
+			result = new Animation(image, width, height);
+			
+			for each (var animation:XML in xml.animations.animation as XMLList) 
+			{
+				var name:String = animation.@name;
+				var frames:Array = [];
+				var rate:Number = animation.@rate;
+				var loop:Boolean = (animation.@loop == "true") ? true : false;
+				var hold:Boolean = (animation.@hold == "true") ? true : false;
+				
+				for each (var frame:XML in animation.frames.frame as XMLList) 
+				{
+					frames.push(new uint(frame));
+				}
+				
+				result.add(name, frames, rate, loop, hold);
+			}
+			
+			return result;
+		}
+		
 		override public function onReloaded():void 
 		{
 			if (filename.length == 0)
