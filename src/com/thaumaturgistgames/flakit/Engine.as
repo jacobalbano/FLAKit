@@ -53,7 +53,7 @@ package com.thaumaturgistgames.flakit
 			}
 			else
 			{
-				if ((this.flags & Library.USE_AUDIO) || (this.flags & Library.USE_IMAGES))
+				if (this.flags & Library.USE_XML)
 				{
 					if (stage) load();
 					else addEventListener(Event.ADDED_TO_STAGE, load);

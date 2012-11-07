@@ -29,11 +29,8 @@
 		private static var engine:Engine;
 		private static var loader:LibraryLoader;
 		
-		public static const USE_IMAGES:int = 2;
-		public static const USE_AUDIO:int = 4;
-		public static const USE_EMBEDDED:uint = 8;
-		public static const USE_XML:uint = 16;
-		public static const USE_ALL:uint = USE_AUDIO | USE_IMAGES | USE_XML;
+		public static const USE_EMBEDDED:uint = 0;
+		public static const USE_XML:uint = 1;
 		
 		public function Library() 
 		{
@@ -261,31 +258,22 @@
 		
 		private static function xmlLoaded(e:Event):void
 		{
-			if ((loadFlags & USE_IMAGES) > 0)
+			for each (var imagename:XML in loader.XMLData.images.image) 
 			{
-				for each (var imagename:XML in loader.XMLData.images.image) 
-				{
-					new ImageLoader(imagename);
-					totalImages++;
-				}
+				new ImageLoader(imagename);
+				totalImages++;
 			}
 			
-			if ((loadFlags & USE_AUDIO) > 0)
+			for each (var soundname:XML in loader.XMLData.sounds.sound) 
 			{
-				for each (var soundname:XML in loader.XMLData.sounds.sound) 
-				{
-					new SoundLoader(soundname);
-					totalSounds++;
-				}
+				new SoundLoader(soundname);
+				totalSounds++;
 			}
 			
-			if ((loadFlags & USE_XML) > 0)
+			for each (var docname:XML in loader.XMLData.xmls.xml) 
 			{
-				for each (var docname:XML in loader.XMLData.xmls.xml) 
-				{
-					new XMLLoader(docname);
-					totalXMLs++;
-				}
+				new XMLLoader(docname);
+				totalXMLs++;
 			}
 			
 			if (!(totalImages || totalSounds || totalXMLs))
@@ -300,7 +288,10 @@
 		private static function checkInit():void
 		{
 			
-			if (!isInitialized)		throw new Error("Library hasn't been initialized!");
+			if (!isInitialized)
+			{
+				throw new Error("Library hasn't been initialized!");
+			}
 		}
 		
 	}

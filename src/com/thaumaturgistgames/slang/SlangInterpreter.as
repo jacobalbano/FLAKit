@@ -111,28 +111,18 @@ package com.thaumaturgistgames.slang
 			//	Read the script line by line
 			for (var line:int = 0; line < script.length; ++line)
 			{
+				var stack:Array = separate(script[line]);
+				
+				if (stack.length == 0 || script[line].length == 0)
+				{
+					raiseError("Line " + (line + 1) + ": Expression expected");
+					return false;
+				}
+				
 				var thisObj:Object = null;
-				var fn:String = "";
-				var args:String = "";
-				var argv:Array = null;
+				var fn:String = stack[0];
+				var argv:Array = stack.slice(1, stack.length);
 				var funcID:int = -1;
-				var funcRange:int = -1;
-				
-				//	Strip out all the whitespace
-				script[line] = replaceChar(script[line], " ", "");
-				
-				//	Find the end of the function name, if it exists
-				funcRange = script[line].indexOf("[");
-				
-				if (funcRange >= 0)
-				{
-					fn = script[line].substr(0, funcRange);					
-					args = script[line].substr(funcRange, script[line].length - 1);
-				}
-				else
-				{
-					fn = script[line];
-				}
 				
 				//	Find the function declaration in binds
 				for (var findFunc:int = 0; findFunc < functions.length; ++findFunc)
@@ -159,35 +149,40 @@ package com.thaumaturgistgames.slang
 				}
 				else
 				{
-					if (args == "")
+					if (argv.length == 0)
 					{
 						raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " cannot be called without a parameter list");
 						return false;
 					}
 				}
 				
-				if (args.charAt(0) == "[" && args.charAt(args.length - 1) == "]")
+				var expectCount:uint = functions[funcID][ARG_TYPES].length;
+				
+				if (argv.length < expectCount)
 				{
-					//	Cut the braces off of the parameter list
-					args = args.substr(1, args.length - 2);
+					raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + expectCount + " parameter" + (expectCount == 1 ? "" : "s") + ", but got " + argv.length);
+					return false;
+				}
+				else if (argv.length > expectCount)
+				{
+					write("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + expectCount + " parameter" + (expectCount == 1 ? "" : "s") + ", but got " + argv.length + "; ignoring extra parameters.");
 					
-					argv = args.split(",");
-					
-					if (argv.length != functions[funcID][ARG_TYPES].length)
+					while (argv.length > expectCount)
 					{
-						raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + functions[funcID][ARG_TYPES].length + " parameters, but " + argv.length + " was passed");
+						argv.pop();
 					}
-					
-					for (var i:int = 0; i < argv.length; ++i)
+				}
+				
+				for (var i:int = 0; i < argv.length; ++i)
+				{
+					if (functions[funcID][ARG_TYPES][i] == Boolean)
 					{
-						if (functions[funcID][ARG_TYPES][i] == Boolean)
-						{
-							argv[i] = getBoolean(argv[i]);
-						}
-						else
-						{
-							argv[i] = new functions[funcID][ARG_TYPES][i](argv[i]);
-						}
+						argv[i] = getBoolean(argv[i]);
+					}
+					else
+					{
+						var type:Class = functions[funcID][ARG_TYPES][i];
+						argv[i] = new type(argv[i]);
 					}
 				}
 				
@@ -196,6 +191,47 @@ package com.thaumaturgistgames.slang
 			}
 			
 			return true;
+		}
+		
+		private function separate(str:String):Array 
+		{
+			var inString:Boolean = false;
+			var builder:String = "";
+			var result:Array = [];
+			
+			for (var i:int = 0; i < str.length; ++i)
+			{
+				switch (str.charAt(i))
+				{
+					case " ":
+						if (inString)
+						{
+							builder += " ";
+						}
+						else
+						{
+							if (builder.length > 0)
+							{
+								result.push(builder);
+								builder = "";
+							}
+						}
+						break;
+					case "\"":
+						inString = !inString;
+						break;
+					default:
+						builder += str.charAt(i);
+						break;
+				}
+			}
+			
+			if (builder != " ")
+			{
+				result.push(builder);
+			}
+			
+			return result;
 		}
 		
 		private function raiseError(message:String):String

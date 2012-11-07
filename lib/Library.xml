@@ -4,4 +4,6 @@
 <library>
     <images />
     <sounds />
+    <xmls>
+    </xmls>
 </library>

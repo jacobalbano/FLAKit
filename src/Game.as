@@ -9,15 +9,14 @@
 		public function Game()
 		{
 			//	Initialize library
-			super(Library.USE_ALL);
+			super(Library.USE_XML);
 		}
 		
 		override public function init():void 
 		{
-			super.init();			
+			super.init();
 			//	Entry point
 		}
-		
 	}
 
 }
