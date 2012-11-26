@@ -26,7 +26,6 @@ package com.thaumaturgistgames.flakit.loader
     
         private function onComplete(event:Event):void
         {
-            //trace("Load of XML library complete.");
 			xml = new XML(loader.data);
 			loader.removeEventListener(Event.COMPLETE, onComplete);
 			Library.addXML(filename, xml);

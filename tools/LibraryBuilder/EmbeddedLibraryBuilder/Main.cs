@@ -26,13 +26,14 @@ class Program
 				"package",
 				"{",
 				"	import com.thaumaturgistgames.flakit.Library;",
+				"	import flash.utils.ByteArray;",
 				"	",
 				"	/**",
 				"	* Generated with LibraryBuilder for FLAKit",
  				"	* http://www.thaumaturgistgames.com/FLAKit",
  				"	*/",
  				"	public class EmbeddedAssets",
- 				"	{",
+ 				"	{"
 			};
 			
 			string[] classOutlineBegin = 
@@ -45,6 +46,7 @@ class Program
 			string[] classOutlineEnd = 
 			{
 				"		}",
+ 				"		private function getXML(c:Class):XML{var d:ByteArray = new c;var s:String = d.readUTFBytes(d.length);return new XML(s);}",
 				"	}",
 				"}"
 			};
@@ -77,7 +79,7 @@ class Program
 			foreach ( KeyValuePair<string, string> pair in imageAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addImage(String(\"";
+				string addStatementBegin = "Library.addImage(new String(\"";
 				string addStatementMiddle = "\").split(\"/\").join(\".\"), new ";
 				string addStatementEnd = ");";
 				
@@ -87,9 +89,19 @@ class Program
 			foreach ( KeyValuePair<string, string> pair in soundAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addSound(String(\"";
+				string addStatementBegin = "Library.addSound(new String(\"";
 				string addStatementMiddle = "\").split(\"/\").join(\".\"), new ";
 				string addStatementEnd = ");";
+				
+				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);
+			}
+			
+			foreach ( KeyValuePair<string, string> pair in xmlAssets)
+			{
+				string format = "			";
+				string addStatementBegin = "Library.addXML(new String(\"";
+				string addStatementMiddle = "\").split(\"/\").join(\".\"), getXML(";
+				string addStatementEnd = "));";
 				
 				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);
 			}

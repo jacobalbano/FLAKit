@@ -11,7 +11,7 @@
 	public class Library 
 	{
 		
-		private static var loadFlags:int;
+		private static var loadFlags:Boolean;
 		
 		public static var totalImages:uint;
 		public static var totalSounds:uint;
@@ -29,8 +29,8 @@
 		private static var engine:Engine;
 		private static var loader:LibraryLoader;
 		
-		public static const USE_EMBEDDED:uint = 0;
-		public static const USE_XML:uint = 1;
+		public static const USE_EMBEDDED:Boolean = true;
+		public static const USE_XML:Boolean = false;
 		
 		public function Library() 
 		{
@@ -43,16 +43,10 @@
 		 * @param	engine	A reference to the document class, for event tracking
 		 * @param	flags	Which components to initialize
 		 */
-		public static function init(parent:Engine, flags:int):void
+		public static function init(parent:Engine, flags:Boolean):void
 		{
 			if (!isInitialized)
-			{	
-				if (flags & Library.USE_EMBEDDED)
-				{
-					isInitialized = true;
-					return;
-				}
-				
+			{
 				engine = parent;
 				
 				imageResources = new Vector.<imageResource>;
@@ -70,13 +64,19 @@
 				
 				loadFlags = flags;
 				
+				if ((flags == Library.USE_EMBEDDED))
+				{
+					isInitialized = true;
+					return;
+				}
+				
 				loader = new LibraryLoader(xmlLoaded);
 				
 				isInitialized = true;	
 			}
 			else
 			{
-				if (! (flags & Library.USE_EMBEDDED))
+				if (flags == Library.USE_XML)
 				{
 					totalImages = 0;
 					loadedImages = 0;
@@ -122,8 +122,20 @@
 			
 			if (++loadedXMLs >= totalXMLs && loadedImages >= totalImages && loadedSounds >= totalSounds)
 			{
-				engine.dispatchEvent(new Event("libraryLoaded"));
+				notifyLoaded();
 			}
+		}
+		
+		static private function notifyLoaded():void 
+		{
+			checkInit();
+			
+			if (loadFlags == Library.USE_EMBEDDED)
+			{
+				return;
+			}
+			
+			engine.dispatchEvent(new Event("libraryLoaded"));
 		}
 		
 		/**
@@ -153,7 +165,7 @@
 			
 			if (++loadedImages >= totalImages && loadedSounds >= totalSounds && loadedXMLs >= totalXMLs)
 			{
-				engine.dispatchEvent(new Event("libraryLoaded"));
+				notifyLoaded();
 			}
 		}
 		
@@ -184,7 +196,7 @@
 			
 			if (++loadedSounds >= totalSounds && loadedImages >= totalImages && loadedXMLs >= totalXMLs)
 			{
-				engine.dispatchEvent(new Event("libraryLoaded"));
+				notifyLoaded();
 			}
 		}
 		
@@ -278,7 +290,7 @@
 			
 			if (!(totalImages || totalSounds || totalXMLs))
 			{
-				engine.dispatchEvent(new Event("libraryLoaded"));
+				notifyLoaded();
 			}
 		}
 		

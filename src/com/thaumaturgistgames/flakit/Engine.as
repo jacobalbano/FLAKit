@@ -13,8 +13,9 @@ package com.thaumaturgistgames.flakit
 	
 	public class Engine extends MovieClip
 	{
-		private var flags:uint;
+		private var flags:Boolean;
 		private var isInitialized:Boolean;
+		private var resourceClass:Class;
 		public var console:Console;
 		public static var game:Game;
 		public static var engine:Engine;
@@ -26,8 +27,18 @@ package com.thaumaturgistgames.flakit
 		 * the EmbeddedLibraryBuilder tool. In order for this to work, the flag must be set to Library.USE_EMBEDDED. Not compatible
 		 * with Flash Professional unless the Flex SDK is installed
 		 */
-		public function Engine(flags:uint = 0, resourceClass:Class = null)
+		public function Engine(flags:Boolean = false, resourceClass:Class = null)
 		{
+			addEventListener(Event.ADDED_TO_STAGE, added);
+			this.flags = flags;
+			this.resourceClass = resourceClass;
+		}
+		
+		private function added(e:Event):void 
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, added);
+			
+			
 			isInitialized = false;
 			
 			game = (this as Game);
@@ -41,7 +52,7 @@ package com.thaumaturgistgames.flakit
 			
 			addEventListener(KeyboardEvent.KEY_UP, refresh);
 			
-			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
+			if ((this.flags == Library.USE_EMBEDDED) && resourceClass)
 			{
 				Library.init(this, flags);
 				
@@ -53,7 +64,7 @@ package com.thaumaturgistgames.flakit
 			}
 			else
 			{
-				if (this.flags & Library.USE_XML)
+				if (this.flags == Library.USE_XML)
 				{
 					if (stage) load();
 					else addEventListener(Event.ADDED_TO_STAGE, load);
@@ -76,7 +87,14 @@ package com.thaumaturgistgames.flakit
 		
 		private function reloadLibrary():void 
 		{
-			Library.init(this, flags);
+			if (flags == Library.USE_EMBEDDED)
+			{
+				console.print("Live reloading isn't supported for embedded assets!");
+			}
+			else
+			{
+				Library.init(this, flags);
+			}
 		}
 		
 		private function load(e:Event = null):void 
