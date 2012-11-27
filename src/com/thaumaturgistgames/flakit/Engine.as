@@ -19,6 +19,7 @@ package com.thaumaturgistgames.flakit
 		public var console:Console;
 		public static var game:Game;
 		public static var engine:Engine;
+		public var onReload:Function;
 		
 		/**
 		 * Creates a new engine base
@@ -32,6 +33,7 @@ package com.thaumaturgistgames.flakit
 			addEventListener(Event.ADDED_TO_STAGE, added);
 			this.flags = flags;
 			this.resourceClass = resourceClass;
+			onReload = null;
 		}
 		
 		private function added(e:Event):void 
@@ -110,6 +112,11 @@ package com.thaumaturgistgames.flakit
 		private function loaded(event:Event):void
 		{
 			console.print("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound," : "sounds,", Library.totalXMLs, "xml", Library.totalXMLs == 1 ? "file" : "files");
+			
+			if (onReload != null)
+			{
+				onReload();
+			}
 			
 			if (!isInitialized)
 			{
