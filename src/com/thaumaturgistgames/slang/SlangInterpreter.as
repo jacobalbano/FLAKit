@@ -15,15 +15,44 @@ package com.thaumaturgistgames.slang
 		private var functions:Array;
 		private var callback:Function;
 		private var errors:Array;
+		private var executing:Boolean;
 		
 		public function SlangInterpreter() 
 		{
 			callback = defaultErrorHandler;
 			functions = [];
 			errors = [];
+			executing = false;
 			addFunction("help", help, [], this, "Displays this help screen");
+			addFunction("if", opIf, [Boolean], null, "Abort execution if a false value is recieved");
+			addFunction("not", opNot, [Boolean], null, "Return the inverse of a boolean value");
 		}
 		
+		/**
+		 * Evaluates a parameter, and aborts execution if it is false
+		 * @param	val	The conditional parameter
+		 */
+		private function opIf(val:Boolean):void 
+		{
+			if (!val)
+			{
+				executing = false;
+			}
+		}
+		
+		/**
+		 * Invert a boolean variable
+		 * @param	val	The variable to invert
+		 * @return	The inverted parameter
+		 */
+		private function opNot(val:Boolean):Boolean
+		{
+			return !val;
+		}
+		
+		/**
+		 * Set the callback for text output
+		 */
 		public function set errorHandler(handler:Function):void
 		{
 			if (handler == null)
@@ -51,7 +80,7 @@ package com.thaumaturgistgames.slang
 		 */
 		public function getVersion():Number 
 		{
-			return 0.15;
+			return 0.5;
 		}
 		
 		/**
@@ -96,103 +125,191 @@ package com.thaumaturgistgames.slang
 		 */
 		public function doScript(script:Array):void
 		{
-			if (!executeScript(script))
+			for each (var line:String in script) 
 			{
-				var message:String;
-				while (message = getError())
+				executeLine(line);
+				
+				errors.reverse();
+				while (errors.length > 0)
 				{
-					write(message);
+					callback(errors.pop());
 				}
 			}
 		}
 		
-		private function executeScript(script:Array):Boolean
+		/**
+		 * Execute a single line of Slang code
+		 * @param	line	The line to execute
+		 */
+		private function executeLine(line:String):void
 		{
-			//	Read the script line by line
-			for (var line:int = 0; line < script.length; ++line)
+			executing = true;
+			var stack:Array = separate(line);
+			
+			var callstack:Array = [];
+			var argstack:Array = [];
+			var bytecode:Array = [];
+			
+			function pushArg(arg:*):void
 			{
-				var stack:Array = separate(script[line]);
-				
-				if (stack.length == 0 || script[line].length == 0)
+				argstack.push(arg);
+				checkCall();
+			}
+			
+			function pushCall(funcID:int):void
+			{
+				callstack.push(funcID);
+				checkCall();
+			}
+			
+			function checkCall():void
+			{
+				if (callstack.length > 0)
 				{
-					raiseError("Line " + (line + 1) + ": Expression expected");
-					return false;
-				}
-				
-				var thisObj:Object = null;
-				var fn:String = stack[0];
-				var argv:Array = stack.slice(1, stack.length);
-				var funcID:int = -1;
-				
-				//	Find the function declaration in binds
-				for (var findFunc:int = 0; findFunc < functions.length; ++findFunc)
-				{
-					if (functions[findFunc][DECLARATION] == fn)
+					var definition:Array = functions[callstack[callstack.length - 1]];
+					var types:Array = definition[ARG_TYPES];
+					var paramCount:int = types.length;
+					
+					if (argstack.length >= paramCount)
 					{
-						funcID = findFunc;
-						break;
+						var result:* = executeCall(callstack.pop(), argstack);
+						
+						while (paramCount >= 0)
+						{
+							paramCount--;
+							argstack.pop();
+						}
+						
+						if (result != undefined)
+						{
+							pushArg(result);
+						}
 					}
 				}
-				
-				if (funcID < 0)
+			}
+			
+			for each (var word:String in stack) 
+			{
+				if (!executing)
 				{
-					raiseError("Line " + (line + 1) + ": Couldn't resolve '" + fn + "' as a function.");
-					return false;
+					return;
 				}
 				
-				thisObj = functions[funcID][THIS_OBJ];
+				var funcIndex:int = findFunction(word);
 				
-				//	Check if we have arguments to pass
-				if (functions[funcID][ARG_TYPES].length == 0)
+				if (funcIndex < 0)
 				{
-					argv = [];
+					//Function not found, so assume it's a value, like a single-word string
+					if (callstack.length != 0)
+					{
+						pushArg(word);
+					}
 				}
 				else
 				{
-					if (argv.length == 0)
-					{
-						raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " cannot be called without a parameter list");
-						return false;
-					}
+					pushCall(funcIndex);
 				}
 				
-				var expectCount:uint = functions[funcID][ARG_TYPES].length;
-				
-				if (argv.length < expectCount)
-				{
-					raiseError("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + expectCount + " parameter" + (expectCount == 1 ? "" : "s") + ", but got " + argv.length);
-					return false;
-				}
-				else if (argv.length > expectCount)
-				{
-					write("Line " + (line + 1) + ": " + functions[funcID][DECLARATION] + " expects " + expectCount + " parameter" + (expectCount == 1 ? "" : "s") + ", but got " + argv.length + "; ignoring extra parameters.");
-					
-					while (argv.length > expectCount)
-					{
-						argv.pop();
-					}
-				}
-				
-				for (var i:int = 0; i < argv.length; ++i)
-				{
-					if (functions[funcID][ARG_TYPES][i] == Boolean)
-					{
-						argv[i] = getBoolean(argv[i]);
-					}
-					else
-					{
-						var type:Class = functions[funcID][ARG_TYPES][i];
-						argv[i] = new type(argv[i]);
-					}
-				}
-				
-				//	Call the function
-				functions[funcID][FUNCTION].apply(thisObj, argv);
 			}
 			
-			return true;
+			checkCall();
 		}
 		
+		/**
+		 * Execute a script function and return the result
+		 * @param	funcID	The ID of the function to execute
+		 * @param	argstack	The argument stack from which to pull parameters
+		 * @return	The return value of the executing function, if any
+		 */
+		private function executeCall(funcID:int, argstack:Array):* 
+		{
+			var thisObj:Object = functions[funcID][THIS_OBJ];
+			var func:Function = functions[funcID][FUNCTION];
+			var paramCount:int = functions[funcID][ARG_TYPES].length;
+			var params:Array = [];
+			
+			for (var i:int = 0; i < paramCount; ++i)
+			{
+				params.push(param_cast(funcID, i, argstack[i]));
+			}
+			
+			//	Call the function
+			try
+			{
+				return func.apply(thisObj, params);
+			}
+			catch (e:Error)
+			{
+				raiseError(e.getStackTrace().split("\n")[0]);
+				return;
+			}
+		}
+		
+		/**
+		 * Cast a value to the appropriate type to be used in a function
+		 * @param	funcID	The function to be called
+		 * @param	param	The index of the parameter type
+		 * @param	value	The generic value to be converted
+		 * @return	The value as the correct type
+		 */
+		private function param_cast(funcID:int, param:int, value:*):*
+		{
+			if (functions[funcID][ARG_TYPES][param] == Boolean)
+			{
+				if (value is String)
+				{
+					var string:String = value as String;
+					return (string.search("true") >= 0 || string.search("1") >= 0);
+				}
+				else
+				{
+					return value as Boolean;
+				}
+				
+				return false;
+			}
+			else if (functions[funcID][ARG_TYPES][param] == String)
+			{
+				var slice:String = value;
+				if (slice.charAt(0) == "'" && slice.charAt(slice.length - 1) == "'")
+				{
+					return slice.slice(1, slice.length - 1);
+				}
+				
+				return slice;
+			}
+			else
+			{
+				var type:Class = functions[funcID][ARG_TYPES][param];
+				return new type(value);
+			}
+			
+			return null;	//	Shouldn't happen
+		}
+		
+		/**
+		 * Search for a registered function by name and return its index, or -1 if it doesn't exist
+		 * @param	fn	The function declaration
+		 * @return	The function index or -1 on failure
+		 */
+		private function findFunction(fn:String):int
+		{
+			for (var findFunc:int = 0; findFunc < functions.length; ++findFunc)
+			{
+				if (functions[findFunc][DECLARATION] == fn)
+				{
+					return findFunc;
+				}
+			}
+			
+			return -1;
+		}
+		
+		/**
+		 * Separate a string into chunks at the spaces, keeping text surrounded by quotation marks contiguous
+		 * @param	str	The string to separate
+		 * @return	An array containing the chunks
+		 */
 		private function separate(str:String):Array 
 		{
 			var inString:Boolean = false;
@@ -218,7 +335,8 @@ package com.thaumaturgistgames.slang
 						}
 						break;
 					case "\"":
-						inString = !inString;
+						inString = !inString
+						builder += "'";
 						break;
 					default:
 						builder += str.charAt(i);
@@ -234,17 +352,20 @@ package com.thaumaturgistgames.slang
 			return result;
 		}
 		
+		/**
+		 * Raise an error to be reported on execution end
+		 * @param	message	The error message
+		 * @return	The error message
+		 */
 		private function raiseError(message:String):String
 		{
 			errors.push(message);
 			return message;
 		}
 		
-		public function getError():String
-		{
-			return errors.length > 0 ? errors.pop() : null;
-		}
-		
+		/**
+		 * List the registered functions in the console
+		 */
 		public function help():void
 		{
 			callback("Commands:");
@@ -259,7 +380,7 @@ package com.thaumaturgistgames.slang
 					argTypes = new String(functions[command][ARG_TYPES]);
 					argTypes = replaceChar(argTypes, "[class ", "");
 					argTypes = replaceChar(argTypes, "]", "");
-					argTypes = "[" + argTypes + "]";
+					argTypes = replaceChar(argTypes, ",", ", ");
 				}
 				
 				if (functions[command][DOC] != "")
@@ -271,11 +392,13 @@ package com.thaumaturgistgames.slang
 			}
 		}
 		
-		private function getBoolean(string:String):Boolean
-		{
-			return (string.search("true") >= 0 || string.search("1") >= 0);
-		}
-		
+		/**
+		 * Replace patterns in a string
+		 * @param	s	The in string
+		 * @param	a	The pattern to replace
+		 * @param	b	The string with which to replace
+		 * @return	The in string with the specified pattern replaced
+		 */
 		private function replaceChar(s:String, a:String, b:String):String
 		{
 			var ar:Array = s.split(a);
@@ -284,11 +407,19 @@ package com.thaumaturgistgames.slang
 			return s;
 		}
 		
+		/**
+		 * Print a message to the callback
+		 * @param	...rest	Variable parameters
+		 */
 		private function write(...rest):void
 		{
 			callback(rest.join(" "));
 		}
 		
+		/**
+		 * Used as the fallback when an invalid function is set as the error handler
+		 * @param	message
+		 */
 		private function defaultErrorHandler(message:String):void 
 		{
 			trace(message);
