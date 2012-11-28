@@ -1,6 +1,7 @@
 package com.thaumaturgistgames.flakit 
 {
 	import com.thaumaturgistgames.slang.SlangInterpreter;
+	import com.thaumaturgistgames.slang.Stdlib;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -28,6 +29,7 @@ package com.thaumaturgistgames.flakit
 		public function Console() 
 		{
 			engine = new SlangInterpreter();
+			engine.importModule(new Stdlib());
 			
 			historyIndex = 0;
 			history = [];

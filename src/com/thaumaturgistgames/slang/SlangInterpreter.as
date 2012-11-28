@@ -34,10 +34,7 @@ package com.thaumaturgistgames.slang
 		 */
 		private function opIf(val:Boolean):void 
 		{
-			if (!val)
-			{
-				executing = false;
-			}
+			executing = val;
 		}
 		
 		/**
@@ -48,6 +45,11 @@ package com.thaumaturgistgames.slang
 		private function opNot(val:Boolean):Boolean
 		{
 			return !val;
+		}
+		
+		public function importModule(module:Module):void
+		{
+			module.bind(this);
 		}
 		
 		/**
@@ -321,9 +323,11 @@ package com.thaumaturgistgames.slang
 				switch (str.charAt(i))
 				{
 					case " ":
+					case "\n":
+					case "\t":
 						if (inString)
 						{
-							builder += " ";
+							builder += str.charAt(i);
 						}
 						else
 						{
@@ -337,6 +341,11 @@ package com.thaumaturgistgames.slang
 					case "\"":
 						inString = !inString
 						builder += "'";
+						if (!inString)
+						{
+							result.push(builder);
+							builder = "";
+						}
 						break;
 					default:
 						builder += str.charAt(i);
@@ -411,7 +420,7 @@ package com.thaumaturgistgames.slang
 		 * Print a message to the callback
 		 * @param	...rest	Variable parameters
 		 */
-		private function write(...rest):void
+		public function write(...rest):void
 		{
 			callback(rest.join(" "));
 		}
