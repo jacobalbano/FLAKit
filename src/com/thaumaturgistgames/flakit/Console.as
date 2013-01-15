@@ -29,6 +29,8 @@ package com.thaumaturgistgames.flakit
 		{
 			scope = new Scope();
 			
+			scope.addFunction(new SlangFunction("print", print).paramCount(1).documentation("print a string to the console").self(this));
+			
 			historyIndex = 0;
 			history = [];
 			
@@ -185,11 +187,12 @@ package com.thaumaturgistgames.flakit
 				
 				try
 				{
+					trace("trying here");
 					scope.compile(command).execute();
 				}
 				catch (err:Error)
 				{
-					print("Error!\t" + err.message);
+					print(err.message);
 				}
 				
 				if (history.length == 0 || (history[history.length - 1] != command))

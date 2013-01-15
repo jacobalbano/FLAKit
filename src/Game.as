@@ -17,13 +17,6 @@
 		{
 			super.init();
 			//	Entry point
-			
-			console.slang.addFunction(new SlangFunction("print", print).paramCount(1).self(this));
-		}
-		
-		private function print(s:String):void
-		{
-			console.print(s);
 		}
 	}
 

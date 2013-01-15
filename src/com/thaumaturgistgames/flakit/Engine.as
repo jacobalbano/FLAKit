@@ -35,12 +35,6 @@ package com.thaumaturgistgames.flakit
 			engine = this;
 			
 			this.flags = flags;
-			console = new Console();
-			addChild(console);
-			
-			console.slang.addFunction(new SlangFunction("reload", reloadLibrary).paramCount(0).self(this).documentation("Reloads library assets"));
-			
-			addEventListener(KeyboardEvent.KEY_UP, refresh);
 			
 			if ((this.flags & Library.USE_EMBEDDED) && resourceClass)
 			{
@@ -91,14 +85,25 @@ package com.thaumaturgistgames.flakit
 		}
 		
 		private function loaded(event:Event):void
-		{
-			console.print("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound," : "sounds,", Library.totalXMLs, "xml", Library.totalXMLs == 1 ? "file" : "files");
-			
+		{	
 			if (!isInitialized)
 			{
 				isInitialized = true;
+				
+				if (console == null)
+				{
+					console = new Console();
+					addChild(console);
+					
+					console.slang.addFunction(new SlangFunction("reload", reloadLibrary).paramCount(0).self(this).documentation("Reloads library assets"));
+					
+					addEventListener(KeyboardEvent.KEY_UP, refresh);
+				}
+				
 				init();
 			}
+			
+			console.print("Library loaded:", Library.totalImages, Library.totalImages == 1 ? "image," : "images,", Library.totalSounds, Library.totalSounds == 1 ? "sound," : "sounds,", Library.totalXMLs, "xml", Library.totalXMLs == 1 ? "file" : "files");
 		}
 		
 		public function init():void

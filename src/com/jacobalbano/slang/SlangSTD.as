@@ -36,6 +36,16 @@ package com.jacobalbano.slang
 			return !b;
 		}
 		
+		public static function sAnd(b1:Boolean, b2:Boolean):Boolean
+		{
+			return b1 && b2;
+		}
+		
+		public static function sOr(b1:Boolean, b2:Boolean):Boolean
+		{
+			return b1 || b2;
+		}
+		
 	}
 
 }
