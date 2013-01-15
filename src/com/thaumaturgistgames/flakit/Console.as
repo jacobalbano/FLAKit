@@ -1,6 +1,6 @@
-package com.thaumaturgistgames.flakit 
+package com.thaumaturgistgames.flakit
 {
-	import com.thaumaturgistgames.slang.SlangInterpreter;
+	import com.jacobalbano.slang.*;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -14,9 +14,9 @@ package com.thaumaturgistgames.flakit
 	 * In-game console class
 	 * @author Jake Albano
 	 */
-	public class Console extends Sprite 
+	public class Console extends Sprite
 	{
-		private var engine:SlangInterpreter;
+		private var scope:Scope;
 		
 		private var inputField:TextField;
 		private var outputField:TextField;
@@ -25,9 +25,9 @@ package com.thaumaturgistgames.flakit
 		private var historyIndex:int;
 		private var history:Array;
 		
-		public function Console() 
+		public function Console()
 		{
-			engine = new SlangInterpreter();
+			scope = new Scope();
 			
 			historyIndex = 0;
 			history = [];
@@ -41,9 +41,9 @@ package com.thaumaturgistgames.flakit
 			addEventListener(Event.ADDED, added);
 		}
 		
-		public function get slang():SlangInterpreter
+		public function get slang():Scope
 		{
-			return engine;
+			return scope;
 		}
 		
 		private function added(e:Event):void
@@ -101,14 +101,14 @@ package com.thaumaturgistgames.flakit
 			downButton.y = outputField.y + outputField.height - downButton.height;
 			
 			downButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
-			{
-				outputField.scrollV++;
-			});
+				{
+					outputField.scrollV++;
+				});
 			
 			upButton.addEventListener(MouseEvent.CLICK, function(event:MouseEvent):void
-			{
-				outputField.scrollV--;
-			});
+				{
+					outputField.scrollV--;
+				});
 			
 			inputBG.alpha = 0.6;
 			outputBG.alpha = 0.6;
@@ -126,110 +126,115 @@ package com.thaumaturgistgames.flakit
 			y = -height;
 			x = 10;
 			
-			engine.errorHandler = function (message:String):void
-			{
-				print(message);
-			};
-			
 			Engine.game.addEventListener(KeyboardEvent.KEY_UP, function(event:KeyboardEvent):void
-			{
-				if (event.keyCode == Keyboard.F11 || event.keyCode == 192 /* tilde */)
 				{
-					juice = 0;
-				   fadingIn = !fadingIn;
-				}
-			});
+					if (event.keyCode == Keyboard.F11 || event.keyCode == 192 /* tilde */)
+					{
+						juice = 0;
+						fadingIn = !fadingIn;
+					}
+				});
 			
 			inputField.addEventListener(Event.CHANGE, function(event:Event):void
-			{
-				//	If the tilde or grave character is entered into the console, remove it
-				if (event.target.text.indexOf("`") >= 0 || event.target.text.indexOf("~") >= 0)
 				{
-					event.target.text = event.target.text.split("`").join("").split("~").join("");
-				}
-			});
+					//	If the tilde or grave character is entered into the console, remove it
+					if (event.target.text.indexOf("`") >= 0 || event.target.text.indexOf("~") >= 0)
+					{
+						event.target.text = event.target.text.split("`").join("").split("~").join("");
+					}
+				});
 			
 			addEventListener(Event.ENTER_FRAME, function(e:Event):void
-			{
-				++juice;
-				const factor:int = 2;
-				
-				if (fadingIn)
 				{
-					if (y < 0)
+					++juice;
+					const factor:int = 2;
+					
+					if (fadingIn)
 					{
-						y += factor * juice;
+						if (y < 0)
+						{
+							y += factor * juice;
+						}
+						
+						stage.focus = inputField;
+					}
+					else
+					{
+						if (y > -height)
+						{
+							y -= factor * juice;
+						}
+						stage.focus = outputField;
 					}
 					
-					stage.focus = inputField;
-				}
-				else
-				{
-					if ( y > -height)
+					if (e.target.parent)
 					{
-						y -= factor * juice;
+						e.target.parent.setChildIndex(e.target, e.target.parent.numChildren - 1);
 					}
-					stage.focus = outputField;
-				}
-				
-				if (e.target.parent)
-				{
-					e.target.parent.setChildIndex(e.target, e.target.parent.numChildren - 1);
-				}
-			});
+				});
 		}
 		
 		private function inputHandler(event:KeyboardEvent):void
 		{
-		   if (event.keyCode == Keyboard.ENTER)
-		   {
-			   outputField.scrollV = outputField.maxScrollV;
-			   var command:String = event.target.text;
-			   event.target.text = "";
-			   print("]", command);
-			   engine.doLine(command);
-			   if (history.length == 0 || (history[history.length - 1] != command))
-			   {
-				   history.push(command);
-			   }
-			   historyIndex = history.length;
-		   }
-		   else if (event.keyCode == Keyboard.UP)
-		   {
-			   historyIndex--;
-			   if (historyIndex <= 0)
-			   {
-				   historyIndex = 0;
-			   }
-			   if (history.length > 0)
-			   {
-				   inputField.text = history[historyIndex];
-			   }
-		   }
-		   else if (event.keyCode == Keyboard.DOWN)
-		   {
-			   historyIndex++;
-			   if (historyIndex >= history.length)
-			   {
-				   historyIndex = history.length - 1;
-			   }
-			   if (history.length > 0)
-			   {
-				   inputField.text = history[historyIndex];
-			   }
-		   }
+			if (event.keyCode == Keyboard.ENTER)
+			{
+				outputField.scrollV = outputField.maxScrollV;
+				var command:String = event.target.text;
+				event.target.text = "";
+				print("]", command);
+				
+				try
+				{
+					scope.compile(command).execute();
+				}
+				catch (err:Error)
+				{
+					print("Error!\t" + err.message);
+				}
+				
+				if (history.length == 0 || (history[history.length - 1] != command))
+				{
+					history.push(command);
+				}
+				
+				historyIndex = history.length;
+			}
+			else if (event.keyCode == Keyboard.UP)
+			{
+				historyIndex--;
+				if (historyIndex <= 0)
+				{
+					historyIndex = 0;
+				}
+				if (history.length > 0)
+				{
+					inputField.text = history[historyIndex];
+				}
+			}
+			else if (event.keyCode == Keyboard.DOWN)
+			{
+				historyIndex++;
+				if (historyIndex >= history.length)
+				{
+					historyIndex = history.length - 1;
+				}
+				if (history.length > 0)
+				{
+					inputField.text = history[historyIndex];
+				}
+			}
 		}
 		
 		/**
 		 * Behaves the same as flash's built in trace method, but outputs via the defined callback
 		 * @param	...rest
 		 */
-		public function print(...rest):void
+		public function print(... rest):void
 		{
 			outputField.text = outputField.text.concat(rest.join(" "), "\n");
 			outputField.scrollV = outputField.maxScrollV;
 		}
-		
+	
 	}
 
 }

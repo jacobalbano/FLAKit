@@ -1,5 +1,6 @@
 package com.thaumaturgistgames.flakit
 {
+	import com.jacobalbano.slang.*;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import com.thaumaturgistgames.utils.Input;
@@ -37,7 +38,7 @@ package com.thaumaturgistgames.flakit
 			console = new Console();
 			addChild(console);
 			
-			console.slang.addFunction("reload", reloadLibrary, [], this, "Reloads library assets");
+			console.slang.addFunction(new SlangFunction("reload", reloadLibrary).paramCount(0).self(this).documentation("Reloads library assets"));
 			
 			addEventListener(KeyboardEvent.KEY_UP, refresh);
 			
@@ -70,7 +71,7 @@ package com.thaumaturgistgames.flakit
 		{
 			if (event.keyCode == Keyboard.F5)
 			{
-				console.slang.doLine("reload");
+				console.slang.compile("reload").execute();
 			}
 		}
 		
