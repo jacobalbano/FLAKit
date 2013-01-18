@@ -9,7 +9,7 @@ using System.IO;
 class Program
 {
 	
-	public static void Main ()
+	public static void Main (string[] args)
 	{
 		List<string> images = RecursiveAssetIterator.GetImages (".");
 		List<string> sounds = RecursiveAssetIterator.GetSounds (".");
@@ -18,7 +18,23 @@ class Program
 		Dictionary<string, string> soundAssets = new Dictionary<string, string>();
 		Dictionary<string, string> xmlAssets = new Dictionary<string, string>();
 		
-		using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"EmbeddedAssets.as"))
+		string outPath = "EmbeddedAssets.as";
+		
+		if (args.Length == 1)
+		{
+			string path = args[0];
+			
+			path.Replace('\\', '/');
+			
+			if (!path.EndsWith("/"))
+			{
+				path += "/";
+			}
+			
+			outPath = path + outPath;
+		}
+		
+		using (System.IO.StreamWriter file = new System.IO.StreamWriter(outPath))
         {
 			
 			string[] header = 
@@ -105,7 +121,6 @@ class Program
 				
 				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);
 			}
-			
 			
 			foreach (string line in classOutlineEnd)
 			{

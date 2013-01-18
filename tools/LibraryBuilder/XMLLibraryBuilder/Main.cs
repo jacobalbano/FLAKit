@@ -11,7 +11,7 @@ using System.Data.SqlClient;
 class Program
 {
 
-	public static void Main ()
+	public static void Main (string[] args)
 	{
 		XmlWriterSettings settings = new XmlWriterSettings ();
 		settings.Indent = true;
@@ -21,7 +21,23 @@ class Program
 		List<string> sounds = RecursiveAssetIterator.GetSounds(@".");
 		List<string> xmls = RecursiveAssetIterator.GetXMLFiles(@".");
 		
-		using (XmlWriter writer = XmlWriter.Create("Library.xml", settings))
+		string outPath = "Library.xml";
+		
+		if (args.Length == 1)
+		{
+			string path = args[0];
+			
+			path.Replace('\\', '/');
+			
+			if (!path.EndsWith("/"))
+			{
+				path += "/";
+			}
+			
+			outPath = path + outPath;
+		}
+		
+		using (XmlWriter writer = XmlWriter.Create(outPath, settings))
 		{
 			writer.WriteComment ("Created with LibraryBuilder for FLAkit ");
 			writer.WriteComment ("http://www.thaumaturgistgames.com/FLAkit");
