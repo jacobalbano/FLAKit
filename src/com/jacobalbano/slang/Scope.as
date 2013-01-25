@@ -19,6 +19,7 @@ package com.jacobalbano.slang
 		private var parent:Scope;
 		private var _bytecode:Array;
 		private var _source:String;
+		private var compiled:Boolean;
 		
 		/**
 		 * Constructs a new scope
@@ -37,6 +38,7 @@ package com.jacobalbano.slang
 				addFunction(new SlangFunction("!", SlangSTD.sNot).paramCount(1).documentation("Returns the inverse of a bool value"));
 				addFunction(new SlangFunction("both", SlangSTD.sAnd).paramCount(2).documentation("Returns true if either parameter is true"));
 				addFunction(new SlangFunction("either", SlangSTD.sOr).paramCount(2).documentation("Returns true if both parameters are true"));
+				addFunction(new SlangFunction("==", SlangSTD.sEquals).paramCount(2).documentation("Returns true if both parameters are equal and have the same type"));
 			}
 		}
 		
@@ -67,10 +69,9 @@ package com.jacobalbano.slang
 		 */
 		public function execute():void
 		{
-			assert(bytecode.length > 0, "Attempted to execute scope prior to compilation");
+			assert(isCompiled, "Attempted to execute scope prior to compilation");
 			
 			var stack:Array = [];
-			trace(stack.join("\n"));
 			
 			function push(val:*):void
 			{
@@ -98,14 +99,36 @@ package com.jacobalbano.slang
 						++count;
 					}
 					
-					//if (func == null)
-					//{
-						//return;
-					//}
-					
 					if (func.params == count)
 					{
-						var ret:* = func.call(stack.slice(stack.length - func.params, stack.length));
+						try 
+						{
+							var ret:* = func.call(stack.slice(stack.length - func.params, stack.length));
+						} 
+						catch (err:TypeError) 
+						{
+							var stacktrace:String = "";
+							function info(...args):void
+							{
+								stacktrace += args.join("") + "\n";
+							}
+							
+							var params:Array = stack.slice(stack.length - func.params, stack.length);
+							
+							info("\n\nCall failed:");
+							info("	with function \"", func.name, "\"");
+							info("	with arguments:");
+							
+							var pcount:int = 0;
+							for (var item:* in params) 
+							{
+								info("		[", pcount++, "]	=	", item);
+							}
+							info("");
+							
+							throw new TypeError("Invalid parameter passed to " + func.name + stacktrace);
+						}
+						
 						while (count --> 0)
 						{
 							//	pop values consumed as parameters
@@ -160,6 +183,7 @@ package com.jacobalbano.slang
 			_bytecode = [];
 			var inString:Boolean = false;
 			var builder:String = "";
+			compiled = false;
 			
 			function resolveVal(value:String):void
 			{
@@ -215,6 +239,7 @@ package com.jacobalbano.slang
 			}
 			
 			_source = str;
+			compiled = true;
 			return this;
 		}
 		
@@ -356,6 +381,11 @@ package com.jacobalbano.slang
 		public function get source():String 
 		{
 			return _source;
+		}
+		
+		public function get isCompiled():Boolean
+		{
+			return compiled;
 		}
 		
 		//} endregion

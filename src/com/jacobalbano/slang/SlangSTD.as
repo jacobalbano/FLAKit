@@ -46,6 +46,11 @@ package com.jacobalbano.slang
 			return b1 || b2;
 		}
 		
+		static public function sEquals(p1:*, p2:*):Boolean
+		{
+			return p1 === p2;
+		}
+		
 	}
 
 }
