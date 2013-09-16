@@ -4,8 +4,8 @@
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.media.Sound;
-	import com.thaumaturgistgames.flakit.resource.*;
 	import com.thaumaturgistgames.flakit.loader.*;
+	import flash.utils.Dictionary;
 	import XML;
 	
 	public class Library 
@@ -21,9 +21,9 @@
 		private static var loadedSounds:uint;
 		private static var loadedXMLs:uint;
 		
-		private static var imageResources:Vector.<imageResource>;
-		private static var soundResources:Vector.<soundResource>;
-		private static var XMLResources:Vector.<XMLResource>;
+		private static var imageResources:Dictionary;
+		private static var soundResources:Dictionary;
+		private static var XMLResources:Dictionary;
 		
 		private static var isInitialized:Boolean;
 		private static var engine:Engine;
@@ -32,7 +32,7 @@
 		public static const USE_EMBEDDED:Boolean = true;
 		public static const USE_XML:Boolean = false;
 		
-		public function Library() 
+		public function Library()
 		{
 			//	Pure static classes cannot be created as objects
 			throw new Error("Cannot instantiate the Library class!");
@@ -49,9 +49,9 @@
 			{
 				engine = parent;
 				
-				imageResources = new Vector.<imageResource>;
-				soundResources = new Vector.<soundResource>;
-				XMLResources = new Vector.<XMLResource>;
+				imageResources = new Dictionary;
+				soundResources = new Dictionary;
+				XMLResources = new Dictionary;
 				
 				totalImages = 0;
 				loadedImages = 0;
@@ -103,39 +103,12 @@
 		{
 			checkInit();
 			
-			
-			var found:Boolean = false;
-			
-			for each (var item:XMLResource in XMLResources) 
-			{
-				if (item.name == name)
-				{
-					item.xml = xml;
-					found = true;
-				}
-			}
-			
-			if (!found)
-			{
-				XMLResources.push(new XMLResource(xml, name));
-			}
+			XMLResources[name] = xml;
 			
 			if (++loadedXMLs >= totalXMLs && loadedImages >= totalImages && loadedSounds >= totalSounds)
 			{
 				notifyLoaded();
 			}
-		}
-		
-		static private function notifyLoaded():void 
-		{
-			checkInit();
-			
-			if (loadFlags == Library.USE_EMBEDDED)
-			{
-				return;
-			}
-			
-			engine.dispatchEvent(new Event("libraryLoaded"));
 		}
 		
 		/**
@@ -147,21 +120,7 @@
 		{
 			checkInit();
 			
-			var found:Boolean = false;
-			
-			for each (var item:imageResource in imageResources) 
-			{
-				if (item.name == name)
-				{
-					item.image = image;
-					found = true;
-				}
-			}
-			
-			if (!found)
-			{
-				imageResources.push(new imageResource(image, name));
-			}
+			imageResources[name] = image;
 			
 			if (++loadedImages >= totalImages && loadedSounds >= totalSounds && loadedXMLs >= totalXMLs)
 			{
@@ -178,26 +137,24 @@
 		{	
 			checkInit();
 			
-			var found:Boolean = false;
-			
-			for each (var item:soundResource in soundResources) 
-			{
-				if (item.name == name)
-				{
-					item.sound = sound;
-					found = true;
-				}
-			}
-			
-			if (!found)
-			{
-				soundResources.push(new soundResource(sound, name));
-			}
+			soundResources[name] = sound;
 			
 			if (++loadedSounds >= totalSounds && loadedImages >= totalImages && loadedXMLs >= totalXMLs)
 			{
 				notifyLoaded();
 			}
+		}
+		
+		static private function notifyLoaded():void 
+		{
+			checkInit();
+			
+			if (loadFlags == Library.USE_EMBEDDED)
+			{
+				return;
+			}
+			
+			engine.dispatchEvent(new Event("libraryLoaded"));
 		}
 		
 		/**
@@ -225,12 +182,10 @@
 		{
 			checkInit();
 			
-			for each (var item:XMLResource in XMLResources) 
+			var xml:XML = XMLResources[name];
+			if (xml)
 			{
-				if (item.name == name)
-				{
-					return item.xml;
-				}
+				return xml;
 			}
 			
 			throw new Error("The document \"" + name + "\" does not exist in the library.");
@@ -245,12 +200,10 @@
 		{
 			checkInit();
 			
-			for each (var item:imageResource in imageResources) 
+			var image:Bitmap = imageResources[name];
+			if (image)
 			{
-				if (item.name == name)
-				{
-					return new Bitmap(item.image.bitmapData);
-				}
+				return image;
 			}
 			
 			throw new Error("The image \"" + name + "\" does not exist in the library.");
@@ -260,9 +213,10 @@
 		{
 			checkInit();
 			
-			for each (var item:soundResource in soundResources) 
+			var sound:Sound = soundResources[name];
+			if (sound)
 			{
-				if (item.name == name) return item.sound;
+				return sound;
 			}
 			
 			throw new Error("The sound \"" + name + "\" does not exist in the library.");
@@ -299,7 +253,6 @@
 		 */
 		private static function checkInit():void
 		{
-			
 			if (!isInitialized)
 			{
 				throw new Error("Library hasn't been initialized!");
