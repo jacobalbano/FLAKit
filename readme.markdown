@@ -1,3 +1,5 @@
+FLAKit is an asset management library with live reloading and automatic asset class generation.
+
 ## Setup
 Extend the FLAKit Engine class to form your document class.
 ```actionscript
