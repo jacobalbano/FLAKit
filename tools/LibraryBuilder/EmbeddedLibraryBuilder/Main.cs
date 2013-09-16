@@ -95,8 +95,8 @@ class Program
 			foreach ( KeyValuePair<string, string> pair in imageAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addImage(new String(\"";
-				string addStatementMiddle = "\").split(\"/\").join(\".\"), new ";
+				string addStatementBegin = "Library.addImage(\"";
+				string addStatementMiddle = "\", new ";
 				string addStatementEnd = ");";
 				
 				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);
@@ -105,8 +105,8 @@ class Program
 			foreach ( KeyValuePair<string, string> pair in soundAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addSound(new String(\"";
-				string addStatementMiddle = "\").split(\"/\").join(\".\"), new ";
+				string addStatementBegin = "Library.addSound(\"";
+				string addStatementMiddle = "\", new ";
 				string addStatementEnd = ");";
 				
 				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);
@@ -115,8 +115,8 @@ class Program
 			foreach ( KeyValuePair<string, string> pair in xmlAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addXML(new String(\"";
-				string addStatementMiddle = "\").split(\"/\").join(\".\"), getXML(";
+				string addStatementBegin = "Library.addXML(\"";
+				string addStatementMiddle = "\", getXML(";
 				string addStatementEnd = "));";
 				
 				file.WriteLine(format + addStatementBegin + pair.Key + addStatementMiddle + pair.Value + addStatementEnd);

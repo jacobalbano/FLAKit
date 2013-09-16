@@ -13,7 +13,7 @@ package
 		
 		public function EmbeddedAssets()
 		{
-			Library.addXML(new String("Library.xml").split("/").join("."), getXML(FLAKIT_ASSET$_1371418527));
+			Library.addXML("Library.xml", getXML(FLAKIT_ASSET$_1371418527));
 		}
 		private function getXML(c:Class):XML{var d:ByteArray = new c;var s:String = d.readUTFBytes(d.length);return new XML(s);}
 	}
