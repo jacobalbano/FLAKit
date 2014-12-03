@@ -1,22 +1,30 @@
 ﻿package
 {
 	import com.thaumaturgistgames.flakit.Library;
-	import com.thaumaturgistgames.flakit.Engine;
-	import com.jacobalbano.slang.*;
+	import flash.display.Sprite;
+	import flash.events.Event;
 	
 	[SWF(width = "800", height = "600")]
-	public class Game extends Engine 
+	public class Game extends Sprite 
 	{
+		public static var library:Library;
+		
 		public function Game()
 		{
-			//	Initialize library
-			super(Library.USE_XML);
+			super();
+			
+			addEventListener(Event.ADDED_TO_STAGE, initLibrary);
 		}
 		
-		override public function init():void 
+		public function initLibrary(e:Event):void
 		{
-			super.init();
+			library = new Library("../lib", Library.DynamicMode, init);
+		}
+		
+		public function init():void 
+		{
 			//	Entry point
+			trace("initialized");
 		}
 	}
 

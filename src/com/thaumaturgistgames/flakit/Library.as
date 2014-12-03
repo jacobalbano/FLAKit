@@ -1,188 +1,87 @@
 ﻿package com.thaumaturgistgames.flakit
 {
-	import com.thaumaturgistgames.display.Sprite;
 	import flash.display.Bitmap;
+	import flash.display.Loader;
+	import flash.errors.IOError;
 	import flash.events.Event;
+	import flash.events.IOErrorEvent;
 	import flash.media.Sound;
-	import com.thaumaturgistgames.flakit.loader.*;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	import XML;
 	
 	public class Library 
 	{
-		
-		private static var loadFlags:Boolean;
-		
-		public static var totalImages:uint;
-		public static var totalSounds:uint;
-		public static var totalXMLs:uint;
-		
-		private static var loadedImages:uint;
-		private static var loadedSounds:uint;
-		private static var loadedXMLs:uint;
-		
-		private static var imageResources:Dictionary;
-		private static var soundResources:Dictionary;
-		private static var XMLResources:Dictionary;
-		
-		private static var isInitialized:Boolean;
-		private static var engine:Engine;
-		private static var loader:LibraryLoader;
-		
-		public static const USE_EMBEDDED:Boolean = true;
-		public static const USE_XML:Boolean = false;
-		
-		public function Library()
-		{
-			//	Pure static classes cannot be created as objects
-			throw new Error("Cannot instantiate the Library class!");
-		}
+		public static const EmbedMode:int = 1;
+		public static const DynamicMode:int = 0;
 		
 		/**
-		 * Initialize the Library so it can be accessed
-		 * @param	engine	A reference to the document class, for event tracking
-		 * @param	flags	Which components to initialize
+		 * Whether loading logs should be traced to the console.
 		 */
-		public static function init(parent:Engine, flags:Boolean):void
+		public var traceLogs:Boolean = false;
+		
+		/**
+		 * The function to call when loading/reloading is finished.
+		 */
+		public var onLoadComplete:Function;
+		
+		private var images:Dictionary;
+		private var sounds:Dictionary;
+		private var xmldocs:Dictionary;
+		
+		private var loaders:Array;
+		
+		private var mode:int;
+		private var path:String;
+		
+		/**
+		 * Constructor.
+		 * @param	path The folder containing your assets, relative to the SWF output directory.
+		 * @param	mode Either Library.EmbedMode or Library.DynamicMode
+		 * @param	onLoadComplete A function to call when the library has finished loading its assets.
+		 */
+		public function Library(path:String, mode:int, onLoadComplete:Function)
 		{
-			if (!isInitialized)
+			this.path = path || "";
+			this.mode = mode;
+			this.onLoadComplete = onLoadComplete;
+			
+			if (this.path.length > 0 && this.path.charAt(this.path.length - 1) != "/")
+				this.path += "/";
+			
+			images = new Dictionary;
+			sounds = new Dictionary;
+			xmldocs = new Dictionary;
+			
+			reload();
+		}
+		
+		public function reload():void
+		{
+			if (mode == Library.DynamicMode)
 			{
-				engine = parent;
-				
-				imageResources = new Dictionary;
-				soundResources = new Dictionary;
-				XMLResources = new Dictionary;
-				
-				totalImages = 0;
-				loadedImages = 0;
-				
-				totalSounds = 0;
-				loadedSounds = 0;
-				
-				totalXMLs = 0;
-				loadedXMLs = 0;
-				
-				loadFlags = flags;
-				
-				if ((flags == Library.USE_EMBEDDED))
-				{
-					isInitialized = true;
-					return;
+				function onComplete(e:Event):void {
+					loader.removeEventListener(Event.COMPLETE, onComplete);
+					xmlLoaded(new XML(loader.data));
 				}
 				
-				loader = new LibraryLoader(xmlLoaded);
-				
-				isInitialized = true;	
-			}
-			else
-			{
-				if (flags == Library.USE_XML)
-				{
-					totalImages = 0;
-					loadedImages = 0;
+				if (path.length > 0 && path.charAt(path.length - 1) != "/")
+					path += "/";
 					
-					totalSounds = 0;
-					loadedSounds = 0;
-					
-					totalXMLs = 0;
-					loadedXMLs = 0;
-					
-					loadFlags = flags;
-					
-					loader = new LibraryLoader(xmlLoaded);
-				}
+				var loader:URLLoader = new URLLoader(new URLRequest(path + "Library.xml"));
+				loader.addEventListener(Event.COMPLETE, onComplete);
 			}
 		}
 		
 		/**
-		 * Add a new XML document to the library
-		 * @param	name	The XML identifier
-		 * @param	xml		The XML to add
+		 * Retrive an XML document
+		 * @param	name	The filename of the xml file to load
+		 * @return			The document
 		 */
-		public static function addXML(name:String, xml:XML):void
+		public function getXML(name:String):XML
 		{
-			checkInit();
-			
-			XMLResources[name] = xml;
-			
-			if (++loadedXMLs >= totalXMLs && loadedImages >= totalImages && loadedSounds >= totalSounds)
-			{
-				notifyLoaded();
-			}
-		}
-		
-		/**
-		 * Add a new image to the library
-		 * @param	name	The image identifier
-		 * @param	image	The Bitmap to add
-		 */
-		public static function addImage(name:String, image:Bitmap):void
-		{
-			checkInit();
-			
-			imageResources[name] = image;
-			
-			if (++loadedImages >= totalImages && loadedSounds >= totalSounds && loadedXMLs >= totalXMLs)
-			{
-				notifyLoaded();
-			}
-		}
-		
-		/**
-		 * Add a new sound to the library
-		 * @param	name	The sound identifier
-		 * @param	sound	The sound to add
-		 */
-		public static function addSound(name:String, sound:Sound):void
-		{	
-			checkInit();
-			
-			soundResources[name] = sound;
-			
-			if (++loadedSounds >= totalSounds && loadedImages >= totalImages && loadedXMLs >= totalXMLs)
-			{
-				notifyLoaded();
-			}
-		}
-		
-		static private function notifyLoaded():void 
-		{
-			checkInit();
-			
-			if (loadFlags == Library.USE_EMBEDDED)
-			{
-				return;
-			}
-			
-			engine.dispatchEvent(new Event("libraryLoaded"));
-		}
-		
-		/**
-		 * Retrive a sprite containing image loaded at runtine
-		 * @param	name	The filename of the image to load
-		 * @return			A sprite containing the image
-		 */
-		public static function getSprite(name:String):Sprite
-		{
-			checkInit();
-			
-			var bmp:Bitmap = getImage(name);
-			var image:Sprite = new Sprite(bmp);
-			image.filename = name;
-			
-			return image;
-		}
-		
-		/**
-		 * Retrive an image loaded at runtine
-		 * @param	name	The filename of the image to load
-		 * @return			The loaded image
-		 */
-		public static function getXML(name:String):XML
-		{
-			checkInit();
-			
-			var xml:XML = XMLResources[name];
+			var xml:XML = xmldocs[name];
 			if (xml)
 			{
 				return xml;
@@ -196,11 +95,9 @@
 		 * @param	name	The filename of the image to load
 		 * @return			The loaded image
 		 */
-		public static function getImage(name:String):Bitmap
+		public function getImage(name:String):Bitmap
 		{
-			checkInit();
-			
-			var image:Bitmap = imageResources[name];
+			var image:Bitmap = images[name];
 			if (image)
 			{
 				return image;
@@ -209,11 +106,9 @@
 			throw new Error("The image \"" + name + "\" does not exist in the library.");
 		}
 		
-		public static function getSound(name:String):Sound
+		public function getSound(name:String):Sound
 		{
-			checkInit();
-			
-			var sound:Sound = soundResources[name];
+			var sound:Sound = sounds[name];
 			if (sound)
 			{
 				return sound;
@@ -222,43 +117,110 @@
 			throw new Error("The sound \"" + name + "\" does not exist in the library.");
 		}
 		
-		private static function xmlLoaded(e:Event):void
+		private function removeLoader(type:String, loader:Object):void 
 		{
-			for each (var imagename:XML in loader.XMLData.images.image) 
+			var i:int = loaders.indexOf(loader);
+			if (i >= 0)
 			{
-				new ImageLoader(imagename);
-				totalImages++;
+				loaders.splice(i, 1);
+				log("removed", type + " loader,", "loader count is now", loaders.length);
+			}
+			else
+			{
+				log("error removing loader", loader);
 			}
 			
-			for each (var soundname:XML in loader.XMLData.sounds.sound) 
+			if (loaders.length == 0 && onLoadComplete != null)
 			{
-				new SoundLoader(soundname);
-				totalSounds++;
-			}
-			
-			for each (var docname:XML in loader.XMLData.xmls.xml) 
-			{
-				new XMLLoader(docname);
-				totalXMLs++;
-			}
-			
-			if (!(totalImages || totalSounds || totalXMLs))
-			{
-				notifyLoaded();
+				onLoadComplete();
 			}
 		}
 		
-		/**
-		 * Make sure Library.init() has been called already
-		 */
-		private static function checkInit():void
+		private function log(...args):void 
 		{
-			if (!isInitialized)
+			if (traceLogs) trace.apply(null, args);
+		}
+		
+		private function xmlLoaded(xml:XML):void
+		{
+			loaders = [];
+			
+			for each (var imagename:String in xml.images.image)
 			{
-				throw new Error("Library hasn't been initialized!");
+				var imgStream:Loader = new Loader();
+				loaders[loaders.length] = imgStream;
+				
+				imgStream.contentLoaderInfo.addEventListener(Event.COMPLETE, makeImageHandler(imagename, imgStream));
+				imgStream.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, makeIOErrorHandler(imagename));
+				imgStream.load(new URLRequest(path + imagename));
+				log("added image loader for", imagename, "-- count is now", loaders.length);
+			}
+			
+			for each (var soundname:String in xml.sounds.sound)
+			{
+				var sndStream:URLRequest = new URLRequest(path + soundname);
+				loaders[loaders.length] = sndStream;
+				
+				var sound:Sound = new Sound(sndStream);
+				sound.addEventListener(Event.COMPLETE, makeSoundHandler(soundname, sound, sndStream));
+				sound.addEventListener(IOErrorEvent.IO_ERROR, makeIOErrorHandler(soundname));
+				log("added sound loader for", soundname, "-- count is now", loaders.length);
+			}
+			
+			for each (var docname:String in xml.xmls.xml)
+			{
+				var xmlStream:URLLoader = new URLLoader(new URLRequest(path + docname));
+				loaders[loaders.length] = xmlStream;
+				
+				xmlStream.addEventListener(Event.COMPLETE, makeXmlHandler(docname, xmlStream));
+				xmlStream.addEventListener(IOErrorEvent.IO_ERROR, makeIOErrorHandler(docname));
+				log("added xml loader for", docname, "-- count is now", loaders.length);
+			}
+			
+			if (loaders.length == 0 && onLoadComplete != null)
+				onLoadComplete();
+		}
+		
+		private function makeIOErrorHandler(name:String):Function
+		{
+			return function(e:IOErrorEvent):void
+			{
+				throw new Error("Failed to load asset '" + name + "'");
 			}
 		}
 		
+		private function makeImageHandler(imagename:String, imgStream:Loader):Function
+		{
+			var handler:Function = function (e:Event):void {
+				e.target.removeEventListener(Event.COMPLETE, handler);
+				images[imagename] = Bitmap(e.target.content);
+				removeLoader("image", imgStream);
+			}
+			
+			return handler;
+		}
+		
+		private function makeSoundHandler(soundname:String, sound:Sound, sndStream:URLRequest):Function
+		{
+			var handler:Function = function (e:Event):void {
+				sound.removeEventListener(Event.COMPLETE, handler);
+				sound[soundname] = sound;
+				removeLoader("sound", sndStream);
+			}
+			
+			return handler;
+		}
+		
+		private function makeXmlHandler(docname:String, xmlStream:URLLoader):Function
+		{
+			var handler:Function = function (e:Event):void {
+				xmlStream.removeEventListener(Event.COMPLETE, handler);
+				xmldocs[docname] = new XML(xmlStream.data);
+				removeLoader("xml", xmlStream);
+			}
+			
+			return handler;
+		}
 	}
 
 }

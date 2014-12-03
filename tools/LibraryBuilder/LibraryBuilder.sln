@@ -1,12 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-# SharpDevelop 4.2.0.8774-RC
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedLibraryBuilder", "EmbeddedLibraryBuilder\EmbeddedLibraryBuilder.csproj", "{1D7666F3-80A3-4876-8A45-1FC2A42C4F91}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecursiveAssetIterator", "RecursiveAssetIterator\RecursiveAssetIterator.csproj", "{39245C31-BEED-40D7-BCD9-091483C791DE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLLibraryBuilder", "XMLLibraryBuilder\XMLLibraryBuilder.csproj", "{6D4FA7C0-C3A1-4765-A8CA-7C176CCD59A1}"
+# SharpDevelop 4.3
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryBuilder", "LibraryBuilder\LibraryBuilder.csproj", "{6D4FA7C0-C3A1-4765-A8CA-7C176CCD59A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,18 +12,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1D7666F3-80A3-4876-8A45-1FC2A42C4F91}.Debug|x86.Build.0 = Debug|x86
-		{1D7666F3-80A3-4876-8A45-1FC2A42C4F91}.Debug|x86.ActiveCfg = Debug|x86
-		{1D7666F3-80A3-4876-8A45-1FC2A42C4F91}.Release|x86.Build.0 = Release|x86
-		{1D7666F3-80A3-4876-8A45-1FC2A42C4F91}.Release|x86.ActiveCfg = Release|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Debug|x86.Build.0 = Debug|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Debug|x86.ActiveCfg = Debug|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Debug|Any CPU.Build.0 = Debug|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Release|x86.Build.0 = Release|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Release|x86.ActiveCfg = Release|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Release|Any CPU.Build.0 = Release|x86
-		{39245C31-BEED-40D7-BCD9-091483C791DE}.Release|Any CPU.ActiveCfg = Release|x86
 		{6D4FA7C0-C3A1-4765-A8CA-7C176CCD59A1}.Debug|x86.Build.0 = Debug|x86
 		{6D4FA7C0-C3A1-4765-A8CA-7C176CCD59A1}.Debug|x86.ActiveCfg = Debug|x86
 		{6D4FA7C0-C3A1-4765-A8CA-7C176CCD59A1}.Debug|Any CPU.Build.0 = Debug|x86
