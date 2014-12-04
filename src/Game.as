@@ -18,15 +18,13 @@
 		
 		public function initLibrary(e:Event):void
 		{
-			library = new Library("../lib", Library.EmbedMode);
-			library.loadEmbedded(new EmbeddedAssets());
-			trace(library.getXML("Library.xml"));
-			addChild(library.getImage("dustin.png"));
-			library.getSound("crickets.mp3").play();
+			library = new Library("../lib", Library.DynamicMode, init);
 		}
 		
 		public function init():void 
 		{
+			//	Entry point
+			trace("initialized");
 		}
 	}
 
