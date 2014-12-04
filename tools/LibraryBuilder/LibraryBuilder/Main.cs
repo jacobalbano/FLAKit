@@ -81,7 +81,10 @@ Switches:
 				"package",
 				"{",
 				"	import com.thaumaturgistgames.flakit.Library;",
+				"	import flash.display.Bitmap;",
+				"	import flash.media.Sound;",
 				"	import flash.utils.ByteArray;",
+				"	import flash.utils.Dictionary;",
 				"	",
 				"	/**",
 				"	* Generated with LibraryBuilder for FLAKit",
@@ -96,12 +99,20 @@ Switches:
 				"		",
 				"		public function EmbeddedAssets()",
 				"		{",
+				"			xml = new Dictionary;",
+				"			images = new Dictionary;",
+				"			sounds = new Dictionary;",
 			};
 			
 			string[] classOutlineEnd = 
 			{
 				"		}",
  				"		private function getXML(c:Class):XML{var d:ByteArray = new c;var s:String = d.readUTFBytes(d.length);return new XML(s);}",
+ 				"		private function addXML(f:String, x:XML):void { xml[f] = x; }",
+ 				"		private function addImage(f:String, b:Bitmap):void { images[f] = b; }",
+ 				"		private function addSound(f:String, s:Sound):void { sounds[f] = s; }",
+ 				"		",
+ 				"		public var xml:Dictionary, images:Dictionary, sounds:Dictionary;",
 				"	}",
 				"}"
 			};
@@ -134,7 +145,7 @@ Switches:
 			foreach ( KeyValuePair<string, string> pair in imageAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addImage(\"";
+				string addStatementBegin = "addImage(\"";
 				string addStatementMiddle = "\", new ";
 				string addStatementEnd = ");";
 				
@@ -144,7 +155,7 @@ Switches:
 			foreach ( KeyValuePair<string, string> pair in soundAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addSound(\"";
+				string addStatementBegin = "addSound(\"";
 				string addStatementMiddle = "\", new ";
 				string addStatementEnd = ");";
 				
@@ -154,7 +165,7 @@ Switches:
 			foreach ( KeyValuePair<string, string> pair in xmlAssets)
 			{
 				string format = "			";
-				string addStatementBegin = "Library.addXML(\"";
+				string addStatementBegin = "addXML(\"";
 				string addStatementMiddle = "\", getXML(";
 				string addStatementEnd = "));";
 				

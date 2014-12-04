@@ -1,6 +1,9 @@
 FLAKit is an asset management library for Actionscript 3 with live reloading and automatic asset class generation.
 
 ## Setup
+
+Dynamic assets are loaded asynchronously, so a callback function is required.
+
 ```actionscript
 public class Main extends Sprite
 {
@@ -22,6 +25,13 @@ public class Main extends Sprite
 		library.onLoadComplete = ...; // reset this if you want; it'll run every time assets are reloaded.
 	}
 }
+```
+
+Embedded assets are available instantly.
+
+```actionscript
+library = new Library("../lib", Library.EmbedMode);
+library.loadEmbedded(new EmbeddedAssets());
 ```
 
 ##Retrieving assets

@@ -41,7 +41,7 @@
 		 * @param	mode Either Library.EmbedMode or Library.DynamicMode
 		 * @param	onLoadComplete A function to call when the library has finished loading its assets.
 		 */
-		public function Library(path:String, mode:int, onLoadComplete:Function)
+		public function Library(path:String, mode:int, onLoadComplete:Function = null)
 		{
 			this.path = path || "";
 			this.mode = mode;
@@ -115,6 +115,18 @@
 			}
 			
 			throw new Error("The sound \"" + name + "\" does not exist in the library.");
+		}
+		
+		public function loadEmbedded(embeddedAssets:EmbeddedAssets):void 
+		{
+			for (var x:String in embeddedAssets.xml)
+				xmldocs[x] = embeddedAssets.xml[x];
+				
+			for (var b:String in embeddedAssets.images)
+				images[b] = embeddedAssets.images[b];
+				
+			for (var s:String in embeddedAssets.sounds)
+				sounds[s] = embeddedAssets.sounds[s];
 		}
 		
 		private function removeLoader(type:String, loader:Object):void 
