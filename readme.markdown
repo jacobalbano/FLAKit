@@ -7,6 +7,8 @@ Dynamic assets are loaded asynchronously, so a callback function is required.
 ```actionscript
 public class Main extends Sprite
 {
+	public static var library:Library;
+	
     public function Main()
     {
 		super();
@@ -27,12 +29,18 @@ public class Main extends Sprite
 }
 ```
 
-Embedded assets are available instantly.
+Embedded assets are available instantly, but a callback can still be supplied to run after EmbeddedAssets are loaded.
 
 ```actionscript
-library = new Library("../lib", Library.EmbedMode);
+library = new Library("../lib", Library.EmbedMode, init);
 library.loadEmbedded(new EmbeddedAssets());
 ```
+
+In the lib/ folder in the FLAKit repository, grab LibraryBuilder.exe and put it in your assets folder.
+Make sure to pass the appropriate path to the Library constructor.
+You'll need to run LibraryBuilder every time you add a new asset.
+Library.xml should stay in your assets folder, while EmbeddedAssets.as should be moved alongside your document class.
+LibraryBuilder.exe can be called with switches to customize the output folders for each file.
 
 ##Retrieving assets
 

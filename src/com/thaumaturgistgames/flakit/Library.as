@@ -39,7 +39,7 @@
 		 * Constructor.
 		 * @param	path The folder containing your assets, relative to the SWF output directory.
 		 * @param	mode Either Library.EmbedMode or Library.DynamicMode
-		 * @param	onLoadComplete A function to call when the library has finished loading its assets.
+		 * @param	onLoadComplete A function to call the first time the library has finished loading its assets.
 		 */
 		public function Library(path:String, mode:int, onLoadComplete:Function = null)
 		{
@@ -127,6 +127,9 @@
 				
 			for (var s:String in embeddedAssets.sounds)
 				sounds[s] = embeddedAssets.sounds[s];
+				
+			if (onLoadComplete != null)
+				onLoadComplete();
 		}
 		
 		private function removeLoader(type:String, loader:Object):void 
@@ -143,9 +146,7 @@
 			}
 			
 			if (loaders.length == 0 && onLoadComplete != null)
-			{
 				onLoadComplete();
-			}
 		}
 		
 		private function log(...args):void 
@@ -191,6 +192,8 @@
 			
 			if (loaders.length == 0 && onLoadComplete != null)
 				onLoadComplete();
+				
+			onLoadComplete = null;
 		}
 		
 		private function makeIOErrorHandler(name:String):Function
