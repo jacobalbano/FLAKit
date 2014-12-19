@@ -34,6 +34,7 @@
 		
 		private var mode:int;
 		private var path:String;
+		private var loading:Boolean;
 		
 		/**
 		 * Constructor.
@@ -59,11 +60,15 @@
 		
 		public function reload():void
 		{
+			if (loading) return;
+			
 			if (mode == Library.DynamicMode)
 			{
+				loading = true;
 				function onComplete(e:Event):void {
 					loader.removeEventListener(Event.COMPLETE, onComplete);
 					xmlLoaded(new XML(loader.data));
+					loading = false;
 				}
 				
 				if (path.length > 0 && path.charAt(path.length - 1) != "/")
@@ -192,8 +197,6 @@
 			
 			if (loaders.length == 0 && onLoadComplete != null)
 				onLoadComplete();
-				
-			onLoadComplete = null;
 		}
 		
 		private function makeIOErrorHandler(name:String):Function
